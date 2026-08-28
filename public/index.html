@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ProMa — Startup Project Board</title>
+<meta name="description" content="A simple project board for startup teams: sign in, create teams, assign tasks, track progress, and catch overdue work automatically." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%233454D1%22/><rect x=%2226%22 y=%2244%22 width=%2212%22 height=%2230%22 rx=%223%22 fill=%22white%22/><rect x=%2244%22 y=%2230%22 width=%2212%22 height=%2244%22 rx=%223%22 fill=%22white%22/><rect x=%2262%22 y=%2218%22 width=%2212%22 height=%2256%22 rx=%223%22 fill=%22white%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<!-- ======================= LANDING PAGE ======================= -->
+<div class="landing" id="landing-page">
+  <div class="landing-ambient-glow" aria-hidden="true"></div>
+
+  <header class="landing-nav">
+    <div class="landing-nav-left">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 100 100" width="26" height="26"><rect width="100" height="100" rx="22" fill="currentColor"/><rect x="26" y="44" width="12" height="30" rx="3" fill="#F7F7F5"/><rect x="44" y="30" width="12" height="44" rx="3" fill="#F7F7F5"/><rect x="62" y="18" width="12" height="56" rx="3" fill="#F7F7F5"/></svg>
+        </span>
+        <span class="brand-name">ProMa<span class="brand-dot">.</span></span>
+      </div>
+      <nav class="landing-nav-links">
+        <a href="#workspaces-section" class="landing-nav-link">Workspaces</a>
+        <a href="#analytics-section" class="landing-nav-link">Live Analytics</a>
+        <a href="#reporting-section" class="landing-nav-link">Executive Reports</a>
+      </nav>
+    </div>
+    <div class="landing-nav-actions">
+      <button class="btn btn-ghost btn-sm" id="landing-login-btn">Sign in</button>
+      <button class="btn btn-primary btn-sm" id="landing-signup-btn">
+        <span>Create Workspace</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="landing-hero">
+    <div class="landing-enterprise-badge" id="landing-pill-btn" role="button" tabindex="0" title="Start with ProMa">
+      <span class="badge-dot-live"></span>
+      <span>Enterprise-Grade Project Orchestration</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </div>
+
+    <h1 class="landing-hero-title">Project management engineered for <span class="hero-title-accent">clarity, speed &amp; accountability.</span></h1>
+    <p class="landing-hero-subtitle">Coordinate initiatives across isolated team workspaces. Automatically identify deadline risks without manual status policing, and generate audit-ready executive reports in seconds.</p>
+
+    <div class="landing-hero-actions">
+      <button class="btn btn-primary btn-lg hero-cta-btn" id="landing-cta-btn">
+        <span>Start Free Workspace</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+      <button class="btn btn-ghost btn-lg hero-login-btn" id="landing-cta-login-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span>Sign in to Workspace</span>
+      </button>
+    </div>
+
+    <!-- Enterprise Trust Metrics -->
+    <div class="landing-trust-row">
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Role-Based Workspace Isolation</span>
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Continuous Overdue Risk Detection</span>
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>1-Click Executive PDF &amp; CSV Exports</span>
+      </div>
+    </div>
+
+    <!-- HIGH-FIDELITY ENTERPRISE APPLICATION VIEWPORT -->
+    <div class="hero-mockup-wrap">
+      <div class="hero-mockup-glow" aria-hidden="true"></div>
+      <div class="hero-mockup-frame">
+        <!-- Mockup Header Bar -->
+        <div class="mockup-window-bar">
+          <div class="mockup-window-dots">
+            <span class="mockup-window-pill">WORKSPACE</span>
+            <span class="mockup-window-name">Acme Corp &middot; Engineering &amp; Operations</span>
+          </div>
+          <div class="mockup-search-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Search activities, assignees, or tags...</span>
+          </div>
+          <div class="mockup-user-pill">
+            <span class="mockup-live-indicator"></span>
+            <span>Real-time Sync Active</span>
+          </div>
+        </div>
+
+        <!-- Mockup Interior Content -->
+        <div class="mockup-interior">
+          <!-- Workspace Title Bar -->
+          <div class="mockup-header-bar">
+            <div class="mockup-team-info">
+              <div class="avatar" style="width:34px;height:34px;font-size:12px;font-weight:700;background:var(--accent);color:#fff;">AC</div>
+              <div>
+                <div class="mockup-team-name">Core Platform &amp; Infrastructure</div>
+                <div class="mockup-team-sub">14 team members &middot; Q3 Release Cycle</div>
+              </div>
+            </div>
+            <div class="mockup-header-stats">
+              <div class="mockup-stat-pill">
+                <span class="mockup-stat-num">91.4%</span>
+                <span class="mockup-stat-lbl">Sprint Velocity</span>
+              </div>
+              <div class="mockup-btn-primary">+ Add Activity</div>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="mockup-kpi-grid">
+            <div class="mockup-kpi-card">
+              <div class="num">35</div>
+              <div class="lbl">Total Initiatives</div>
+            </div>
+            <div class="mockup-kpi-card accent-todo">
+              <div class="num" style="color:var(--todo);">6</div>
+              <div class="lbl">To Do</div>
+            </div>
+            <div class="mockup-kpi-card accent-progress">
+              <div class="num" style="color:var(--progress);">9</div>
+              <div class="lbl">In Progress</div>
+            </div>
+            <div class="mockup-kpi-card accent-complete">
+              <div class="num" style="color:#16924A;">19</div>
+              <div class="lbl">Completed</div>
+            </div>
+            <div class="mockup-kpi-card accent-overdue">
+              <div class="num" style="color:var(--overdue);">1</div>
+              <div class="lbl">Due Work</div>
+            </div>
+          </div>
+
+          <!-- Board Column Grid -->
+          <div class="mockup-board-grid">
+            <!-- Column 1: To Do -->
+            <div class="mockup-col">
+              <div class="mockup-col-head">
+                <span class="mockup-col-dot" style="background:#94A3B8;"></span>
+                <span>To Do</span>
+                <span class="mockup-col-count">6</span>
+              </div>
+              <div class="mockup-task-card">
+                <div class="mockup-task-tags">
+                  <span class="badge badge-priority-normal">● Normal</span>
+                </div>
+                <div class="mockup-task-title">Database query optimization &amp; indexing</div>
+                <div class="mockup-task-meta">
+                  <div style="display:flex;align-items:center;gap:5px;">
+                    <span class="avatar" style="width:18px;height:18px;font-size:8.5px;">JS</span>
+                    <span style="font-size:11px;color:var(--muted);">J. Smith</span>
+                  </div>
+                  <span class="mockup-task-date">Oct 14</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 2: In Progress -->
+            <div class="mockup-col">
+              <div class="mockup-col-head">
+                <span class="mockup-col-dot" style="background:var(--progress);"></span>
+                <span>In Progress</span>
+                <span class="mockup-col-count">9</span>
+              </div>
+              <div class="mockup-task-card" style="border-left: 3px solid var(--progress);">
+                <div class="mockup-task-tags">
+                  <span class="badge badge-priority-high">● High</span>
+                  <span class="badge badge-progress" style="font-size:10px;">Due Today</span>
+                </div>
+                <div class="mockup-task-title">Audit API authentication middleware</div>
+                <div class="mockup-task-meta">
+                  <div style="display:flex;align-items:center;gap:5px;">
+                    <span class="avatar" style="width:18px;height:18px;font-size:8.5px;background:#4F46E5;color:#fff;">DB</span>
+                    <span style="font-size:11px;color:var(--ink);font-weight:600;">D. Biswas</span>
+                  </div>
+                  <span class="mockup-task-date" style="color:var(--progress);font-weight:700;">Today</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 3: Completed -->
+            <div class="mockup-col">
+              <div class="mockup-col-head">
+                <span class="mockup-col-dot" style="background:#16924A;"></span>
+                <span>Complete</span>
+                <span class="mockup-col-count">19</span>
+              </div>
+              <div class="mockup-task-card" style="border-left: 3px solid #16924A;">
+                <div class="mockup-task-tags">
+                  <span class="badge badge-priority-urgent">● Urgent</span>
+                  <span style="color:#16924A;font-size:10.5px;font-weight:700;">✓ Delivered</span>
+                </div>
+                <div class="mockup-task-title">Executive monthly report generation engine</div>
+                <div class="mockup-task-meta">
+                  <div style="display:flex;align-items:center;gap:5px;">
+                    <span class="avatar" style="width:18px;height:18px;font-size:8.5px;">EM</span>
+                    <span style="font-size:11px;color:var(--muted);">E. Miller</span>
+                  </div>
+                  <span class="mockup-task-date" style="color:#16924A;">Done</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY METRICS STRIP -->
+  <section class="landing-stats-strip">
+    <div class="stats-strip-container">
+      <div class="stat-strip-item">
+        <div class="stat-strip-num">0ms</div>
+        <div class="stat-strip-lbl">Optimistic UI Transitions</div>
+      </div>
+      <div class="stat-strip-item">
+        <div class="stat-strip-num">100%</div>
+        <div class="stat-strip-lbl">Automated Overdue Auditing</div>
+      </div>
+      <div class="stat-strip-item">
+        <div class="stat-strip-num">1-Click</div>
+        <div class="stat-strip-lbl">Formal Executive Reporting</div>
+      </div>
+      <div class="stat-strip-item">
+        <div class="stat-strip-num">99.99%</div>
+        <div class="stat-strip-lbl">System Availability SLA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRUCTURED CAPABILITIES SECTION -->
+  <section class="landing-bento-section" id="workspaces-section">
+    <div class="bento-section-head">
+      <div class="bento-badge">Enterprise Architecture</div>
+      <h2>Engineered for scale, simplicity, and structure.</h2>
+      <p class="muted">Eliminate chaotic task hand-offs and complex project overhead with clean, purposeful tooling.</p>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Capability 1: Workspace Isolation -->
+      <div class="bento-card">
+        <div class="bento-icon-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <h3>Multi-Workspace Isolation</h3>
+        <p>Maintain separate workspaces for each department. Each team controls independent activities, role-based permissions, and customized completion metrics.</p>
+        <div class="bento-team-pill is-active">
+          <span style="font-weight:700;">Engineering Core</span> &middot; <span style="font-size:11.5px;color:var(--accent);">Admin Role</span>
+        </div>
+      </div>
+
+      <!-- Capability 2: Live Velocity Dashboard -->
+      <div class="bento-card" id="analytics-section">
+        <div class="bento-icon-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </div>
+        <h3>Continuous Live Analytics</h3>
+        <p>Real-time completion gauges, member workload distribution, and status breakdowns computed directly from ongoing activity.</p>
+        <div class="bento-progress-meter">
+          <div class="bento-meter-head">
+            <span>Team Completion Rate</span>
+            <span style="color:var(--accent);font-weight:700;">91.4%</span>
+          </div>
+          <div class="bento-meter-track"><div class="bento-meter-fill" style="width:91.4%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Capability 3: Automated Due Work Radar -->
+      <div class="bento-card">
+        <div class="bento-icon-pill" style="background:#0F172A;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <h3>Automated Overdue Radar</h3>
+        <p>Zero manual status policing required. Past-due activities and today's critical deadlines surface immediately into the spotlight panel.</p>
+        <div class="bento-alert-pill">
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--overdue);"></span>
+          <span style="font-weight:600;font-size:12px;">Needs Attention: 1 task flagged for review</span>
+        </div>
+      </div>
+
+      <!-- Capability 4: Executive Reporting -->
+      <div class="bento-card" id="reporting-section">
+        <div class="bento-icon-pill" style="background:#0F172A;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        </div>
+        <h3>1-Click Executive Reporting</h3>
+        <p>Generate formal monthly summaries with team health KPIs, member-by-member logs, and managerial sign-off blocks. Ready for print or CSV export.</p>
+        <div class="bento-report-preview">
+          <div class="bento-report-box">
+            <div style="font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:700;">Executive Performance Summary</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin:2px 0;">Team Health: High Velocity / On Track</div>
+            <div style="font-size:11px;color:#16924A;font-weight:600;">✓ 19 of 20 deliverables completed (95%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRAND BOTTOM CTA BANNER -->
+  <section class="landing-cta-banner">
+    <div class="landing-cta-card">
+      <div class="cta-card-content">
+        <h2>Ready to bring clarity and speed to your team?</h2>
+        <p>Create your team workspace today. Experience zero-overhead project tracking with automatic deadline auditing.</p>
+        <div class="landing-cta-buttons">
+          <button class="btn btn-primary btn-lg" id="landing-bottom-signup-btn">
+            <span>Create Workspace Free</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <button class="btn btn-ghost btn-lg" id="landing-bottom-login-btn">Sign in to existing account</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTERPRISE FOOTER -->
+  <footer class="landing-footer">
+    <div class="landing-footer-inner">
+      <div class="footer-brand">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 100 100" width="22" height="22"><rect width="100" height="100" rx="22" fill="currentColor"/><rect x="26" y="44" width="12" height="30" rx="3" fill="#F7F7F5"/><rect x="44" y="30" width="12" height="44" rx="3" fill="#F7F7F5"/><rect x="62" y="18" width="12" height="56" rx="3" fill="#F7F7F5"/></svg>
+          </span>
+          <span class="brand-name">ProMa<span class="brand-dot">.</span></span>
+        </div>
+        <p class="footer-desc">The high-velocity project management platform for modern teams.</p>
+      </div>
+      <div class="footer-status-pill">
+        <span class="status-dot-green"></span>
+        <span>Systems Operational &middot; 99.99% SLA</span>
+      </div>
+    </div>
+    <div class="footer-bottom-row">
+      <span>&copy; 2026 ProMa Inc. All rights reserved.</span>
+      <div class="footer-links">
+        <span>Security</span> &middot; <span>Privacy Policy</span> &middot; <span>Terms of Service</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ======================= AUTH OVERLAY ======================= -->
+<div class="auth-wrap" id="auth-wrap" hidden>
+  <div class="auth-glow-backdrop" aria-hidden="true"></div>
+  <div class="auth-card">
+    <button class="icon-btn auth-close-btn" id="auth-close-btn" aria-label="Close">✕</button>
+
+    <!-- Left Visual Showcase (Desktop) -->
+    <div class="auth-showcase">
+      <div class="auth-showcase-content">
+        <div class="auth-showcase-badge">
+          <span class="auth-pulse-dot"></span>
+          <span>Next-Gen Workspace</span>
+        </div>
+        <h2 class="auth-showcase-title">Manage projects &amp; collaborate at full speed.</h2>
+        <p class="auth-showcase-desc">Track real-time progress, unblock team bottlenecks, and auto-generate monthly executive reports with ProMa.</p>
+
+        <!-- Mini Interactive UI Preview Widget -->
+        <div class="auth-mini-preview">
+          <div class="auth-mini-card">
+            <div class="auth-mini-header">
+              <span class="auth-mini-tag">Sprint In Progress</span>
+              <span class="auth-mini-time">94% complete</span>
+            </div>
+            <div class="auth-mini-title">Q3 Product Launch &amp; Milestones</div>
+            <div class="auth-mini-progress">
+              <div class="auth-mini-fill" style="width:94%;"></div>
+            </div>
+            <div class="auth-mini-meta">
+              <div class="auth-mini-avatars">
+                <span class="auth-mini-av">DB</span>
+                <span class="auth-mini-av">AK</span>
+                <span class="auth-mini-av">+4</span>
+              </div>
+              <span class="auth-mini-status">✓ On track</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trust Features Checklist -->
+        <div class="auth-features-list">
+          <div class="auth-feature-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Real-time Kanban &amp; List views</span>
+          </div>
+          <div class="auth-feature-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Zero-config instant collaboration</span>
+          </div>
+          <div class="auth-feature-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>End-to-end encrypted sessions</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Side -->
+    <div class="auth-form-side">
+      <div class="auth-brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 100 100" width="30" height="30"><rect width="100" height="100" rx="22" fill="currentColor"/><rect x="26" y="44" width="12" height="30" rx="3" fill="#F7F7F5"/><rect x="44" y="30" width="12" height="44" rx="3" fill="#F7F7F5"/><rect x="62" y="18" width="12" height="56" rx="3" fill="#F7F7F5"/></svg>
+        </span>
+        <span class="brand-name">ProMa<span class="brand-dot">.</span></span>
+      </div>
+
+      <div id="auth-banner" class="auth-banner" hidden></div>
+
+      <!-- LOGIN -->
+      <section class="auth-panel" id="panel-login">
+        <div class="auth-heading-wrap">
+          <h1>Welcome back</h1>
+          <p class="muted">Sign in to access your workspaces and tasks.</p>
+        </div>
+
+        <form id="login-form" class="form">
+          <label class="field">
+            <span>Email or username</span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <input type="text" id="login-identifier" autocomplete="username" placeholder="name@example.com" required />
+            </div>
+          </label>
+          <label class="field">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span>Password</span>
+              <button type="button" class="link-btn forgot-link" id="go-forgot" tabindex="-1">Forgot password?</button>
+            </div>
+            <div class="password-input-wrap input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <input type="password" id="login-password" autocomplete="current-password" placeholder="Enter your password" required />
+              <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+                <svg class="eye-icon eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg class="eye-icon eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="login-submit">
+            <span>Log in</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+
+        <div class="auth-divider"><span>or continue with</span></div>
+
+        <div class="auth-social-row">
+          <button type="button" class="btn btn-google btn-block" id="google-login-btn">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.95v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.03l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97l3 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+            <span>Google</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-block auth-mobile-btn" id="go-mobile-login">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            <span>Mobile OTP</span>
+          </button>
+        </div>
+
+        <p class="auth-switch">Don't have an account? <button type="button" class="link-btn" id="go-signup">Create one now</button></p>
+      </section>
+
+      <!-- SIGNUP -->
+      <section class="auth-panel" id="panel-signup" hidden>
+        <div class="auth-heading-wrap">
+          <h1>Create your account</h1>
+          <p class="muted">Start organizing tasks with your team in seconds.</p>
+        </div>
+
+        <form id="signup-form" class="form">
+          <label class="field">
+            <span>Full name</span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <input type="text" id="signup-name" autocomplete="name" placeholder="Alex Morgan" required />
+            </div>
+          </label>
+          <label class="field">
+            <span>Username <em>(optional)</em></span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
+              <input type="text" id="signup-username" autocomplete="username" placeholder="alexm" />
+            </div>
+          </label>
+          <label class="field">
+            <span>Email address</span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <input type="email" id="signup-email" autocomplete="email" placeholder="alex@company.com" required />
+            </div>
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <div class="password-input-wrap input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <input type="password" id="signup-password" autocomplete="new-password" placeholder="At least 8 characters" minlength="8" required />
+              <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+                <svg class="eye-icon eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg class="eye-icon eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
+            <span class="hint">Minimum 8 characters with letters &amp; numbers.</span>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="signup-submit">
+            <span>Continue with Verification</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+
+        <div class="auth-divider"><span>or</span></div>
+        <button type="button" class="btn btn-google btn-block" id="google-signup-btn">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.95v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.03l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97l3 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <p class="auth-switch">Already have an account? <button type="button" class="link-btn" id="go-login-from-signup">Log in</button></p>
+      </section>
+
+      <!-- EMAIL OTP VERIFICATION -->
+      <section class="auth-panel" id="panel-email-otp" hidden>
+        <div class="auth-heading-wrap">
+          <h1>Verify your email</h1>
+          <p class="muted" id="email-otp-sent-to">We sent a 6-digit verification code to your email.</p>
+        </div>
+
+        <form id="email-otp-form" class="form">
+          <label class="field">
+            <span>6-digit OTP Code</span>
+            <input type="text" id="email-otp-code" inputmode="numeric" maxlength="6" placeholder="• • • • • •" required style="font-family:var(--font-mono);font-size:20px;letter-spacing:6px;text-align:center;font-weight:700;" />
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="email-otp-submit">Verify &amp; Create Account</button>
+        </form>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+          <button type="button" class="link-btn" id="email-otp-resend-btn" style="font-size:13px;">Resend Code</button>
+          <span id="email-otp-cooldown" style="font-size:12px;color:var(--muted);"></span>
+        </div>
+
+        <p class="auth-switch" style="margin-top:16px;"><button type="button" class="link-btn" id="go-signup-from-email-otp">Back to Signup</button></p>
+      </section>
+
+      <!-- FORGOT PASSWORD -->
+      <section class="auth-panel" id="panel-forgot" hidden>
+        <div class="auth-heading-wrap">
+          <h1>Reset your password</h1>
+          <p class="muted">Enter your account email and we'll generate a secure reset link.</p>
+        </div>
+        <form id="forgot-form" class="form">
+          <label class="field">
+            <span>Account Email</span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <input type="email" id="forgot-email" placeholder="name@example.com" required />
+            </div>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="forgot-submit">Send Reset Link</button>
+        </form>
+        <p class="auth-switch"><button type="button" class="link-btn" id="go-login-from-forgot">Back to login</button></p>
+      </section>
+
+      <!-- RESET PASSWORD -->
+      <section class="auth-panel" id="panel-reset" hidden>
+        <div class="auth-heading-wrap">
+          <h1>Choose a new password</h1>
+          <p class="muted">Make sure your new password is at least 8 characters.</p>
+        </div>
+        <form id="reset-form" class="form">
+          <input type="hidden" id="reset-token" />
+          <label class="field">
+            <span>New password</span>
+            <div class="password-input-wrap input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <input type="password" id="reset-password" minlength="8" placeholder="New secure password" required />
+              <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+                <svg class="eye-icon eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg class="eye-icon eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="reset-submit">Update Password</button>
+        </form>
+        <p class="auth-switch"><button type="button" class="link-btn" id="go-login-from-reset">Back to login</button></p>
+      </section>
+
+      <!-- MOBILE OTP LOGIN -->
+      <section class="auth-panel" id="panel-mobile" hidden>
+        <div class="auth-heading-wrap">
+          <h1>Log in with mobile</h1>
+          <p class="muted">We'll send a one-time code to verify your identity.</p>
+        </div>
+        <form id="mobile-request-form" class="form">
+          <label class="field">
+            <span>Mobile number</span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <input type="tel" id="mobile-number" placeholder="+1 555 123 4567" required />
+            </div>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="mobile-request-submit">Send Code</button>
+        </form>
+        <p class="auth-switch"><button type="button" class="link-btn" id="go-login-from-mobile">Back to password login</button></p>
+      </section>
+
+      <section class="auth-panel" id="panel-otp" hidden>
+        <div class="auth-heading-wrap">
+          <h1>Enter your code</h1>
+          <p class="muted" id="otp-sent-to">We sent a 6-digit code to your phone.</p>
+        </div>
+        <form id="otp-verify-form" class="form">
+          <input type="hidden" id="otp-mobile" />
+          <label class="field">
+            <span>Verification code</span>
+            <input type="text" id="otp-code" inputmode="numeric" maxlength="6" placeholder="• • • • • •" required style="font-family:var(--font-mono);font-size:20px;letter-spacing:6px;text-align:center;font-weight:700;" />
+          </label>
+          <label class="field" id="otp-name-field" hidden>
+            <span>Your name <em>(new account)</em></span>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <input type="text" id="otp-name" placeholder="Alex Morgan" />
+            </div>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block auth-submit-btn" id="otp-verify-submit">Verify &amp; Log In</button>
+        </form>
+        <p class="auth-switch"><button type="button" class="link-btn" id="go-login-from-otp">Back to login</button></p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MAIN APP ======================= -->
+<div class="app-shell" id="app-shell" hidden>
+
+  <aside class="sidebar">
+    <div class="brand" id="sidebar-brand-btn" style="cursor:pointer;" title="Go to Main Page">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="26" height="26"><rect width="100" height="100" rx="22" fill="currentColor"/><rect x="26" y="44" width="12" height="30" rx="3" fill="#F7F7F5"/><rect x="44" y="30" width="12" height="44" rx="3" fill="#F7F7F5"/><rect x="62" y="18" width="12" height="56" rx="3" fill="#F7F7F5"/></svg>
+      </span>
+      <span class="brand-name">ProMa<span class="brand-dot">.</span></span>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item is-active" data-view="main" id="nav-item-main">
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span> Main Page
+      </button>
+      <button class="nav-item" data-view="my-work" id="nav-item-my-work">
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Work
+      </button>
+
+      <div class="nav-section-title" id="nav-team-section-title">Team Workspace</div>
+
+      <!-- Team switcher -->
+      <div class="team-switcher-wrap" id="sidebar-team-switcher">
+        <button class="team-switcher-btn" id="team-switcher-btn">
+          <span class="ts-icon" id="ts-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+          <span class="ts-name" id="ts-name">Select a team</span>
+          <span class="ts-caret">▾</span>
+        </button>
+        <div class="team-switcher-menu" id="team-switcher-menu" hidden>
+          <div class="ts-list" id="ts-list"></div>
+          <button class="ts-new-btn" id="ts-new-team-btn">+ Create team</button>
+        </div>
+      </div>
+
+      <div class="nav-team-items" id="nav-team-items">
+        <button class="nav-item" data-view="dashboard">
+          <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard
+        </button>
+        <button class="nav-item" data-view="tasks">
+          <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span> Activities
+        </button>
+        <button class="nav-item" data-view="members">
+          <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Members
+        </button>
+        <button class="nav-item" data-view="settings">
+          <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Team Settings
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p id="sidebar-footer-text">Welcome to your ProMa workspace.</p>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="hamburger-btn" id="sidebar-toggle-btn" aria-label="Open menu">☰</button>
+      <div>
+        <p class="current-team-label" id="current-team-label">ProMa Hub</p>
+        <h1 id="view-title">Main Page</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" id="team-report-btn" hidden title="Generate one-click monthly performance report"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Monthly Report</button>
+        <button class="btn btn-primary" id="main-create-team-btn">+ Create team</button>
+        <button class="btn btn-primary" id="quick-add-btn" hidden>+ Add activity</button>
+        <button class="avatar-btn" id="theme-toggle-btn" title="Toggle Light / Dark Theme" aria-label="Toggle theme" style="display:flex;align-items:center;justify-content:center;">
+          <span id="theme-toggle-icon" style="display:flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+        </button>
+        <div class="notif-wrap" style="position:relative;">
+          <button class="avatar-btn" id="topbar-notif-btn" title="Notifications" aria-label="Notifications" style="display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="notif-badge" id="notif-badge" hidden>0</span>
+          </button>
+          <div class="notif-dropdown" id="notif-dropdown" hidden>
+            <div class="notif-header">
+              <span style="font-weight:700;font-size:14px;">Notifications</span>
+              <button class="btn-link" id="notif-mark-all" style="font-size:12px;cursor:pointer;background:none;border:none;color:var(--primary);font-weight:600;">Mark all read</button>
+            </div>
+            <div class="notif-list" id="notif-list">
+              <p class="empty-note" style="padding:16px;text-align:center;">No new notifications</p>
+            </div>
+          </div>
+        </div>
+        <div class="profile-menu-wrap">
+          <button class="avatar-btn" id="profile-btn" aria-label="Profile menu">
+            <span class="avatar" id="profile-avatar">?</span>
+          </button>
+          <div class="profile-menu" id="profile-menu" hidden>
+            <div class="pm-header">
+              <div class="pm-name" id="pm-name">—</div>
+              <div class="pm-email" id="pm-email">—</div>
+            </div>
+            <button class="pm-item" id="pm-edit-profile">Edit profile</button>
+            <button class="pm-item" id="pm-theme-toggle">
+              <span id="pm-theme-icon" style="display:inline-flex;align-items:center;margin-right:6px;vertical-align:-2px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span> <span id="pm-theme-text">Dark Theme</span>
+            </button>
+            <button class="pm-item" id="pm-appearance"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg> Appearance</button>
+            <button class="pm-item" id="pm-notifications">Notification settings</button>
+            <button class="pm-item" id="pm-change-password">Change password</button>
+            <div class="pm-divider"></div>
+            <button class="pm-item pm-danger" id="pm-logout">Log out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div id="view-root" class="view-root">
+      <!-- views render here -->
+    </div>
+  </main>
+</div>
+
+<!-- ======================= MODALS ======================= -->
+
+<!-- Task modal -->
+<div class="modal-backdrop" id="task-modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2 id="task-modal-title">Add activity</h2>
+      <button class="icon-btn" id="task-modal-close" aria-label="Close">✕</button>
+    </div>
+    <form id="task-form" class="form">
+      <input type="hidden" id="task-id" />
+      <label class="field">
+        <span>Activity name</span>
+        <input type="text" id="task-title" placeholder="e.g. Create homepage" required maxlength="120" />
+      </label>
+      <label class="field">
+        <span>Assign to</span>
+        <select id="task-assignee"></select>
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Due date</span>
+          <input type="date" id="task-deadline" required />
+        </label>
+        <label class="field" id="status-field">
+          <span>Status</span>
+          <select id="task-status">
+            <option value="todo" selected>To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="complete">Complete</option>
+          </select>
+        </label>
+      </div>
+      <div class="field-row">
+        <label class="field">
+          <span>Priority</span>
+          <select id="task-priority">
+            <option value="low">● Low</option>
+            <option value="normal" selected>● Normal</option>
+            <option value="high">● High</option>
+            <option value="urgent">● Urgent</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Start date <em>(optional)</em></span>
+          <input type="date" id="task-start" />
+        </label>
+      </div>
+      <label class="field">
+        <span>Description <em>(optional)</em></span>
+        <textarea id="task-description" rows="2" placeholder="What needs to happen for this activity?"></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost btn-danger" id="task-delete-btn" hidden>Delete activity</button>
+        <div class="spacer"></div>
+        <button type="button" class="btn btn-ghost" id="task-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="task-save-btn">Create activity</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Create team modal -->
+<div class="modal-backdrop" id="team-modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Create team</h2>
+      <button class="icon-btn" id="team-modal-close" aria-label="Close">✕</button>
+    </div>
+    <form id="team-form" class="form">
+      <label class="field">
+        <span>Team icon / badge <em>(optional)</em></span>
+        <input type="text" id="team-icon" maxlength="4" placeholder="TEAM" value="" style="width:80px;" />
+      </label>
+      <label class="field">
+        <span>Team name</span>
+        <input type="text" id="team-name" placeholder="e.g. Marketing Team" required maxlength="60" />
+      </label>
+      <label class="field">
+        <span>Description <em>(optional)</em></span>
+        <textarea id="team-description" rows="2" placeholder="Handles all marketing activities"></textarea>
+      </label>
+      <label class="field">
+        <span>Purpose / project <em>(optional)</em></span>
+        <input type="text" id="team-purpose" placeholder="What is this team working on?" />
+      </label>
+      <label class="field">
+        <span>Add members <em>(optional, comma-separated emails)</em></span>
+        <input type="text" id="team-members" placeholder="person@email.com, another@email.com" />
+      </label>
+      <div class="form-actions">
+        <div class="spacer"></div>
+        <button type="button" class="btn btn-ghost" id="team-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create team</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add member modal -->
+<div class="modal-backdrop" id="member-modal-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Add member</h2>
+      <button class="icon-btn" id="member-modal-close" aria-label="Close">✕</button>
+    </div>
+    <form id="member-form" class="form">
+      <label class="field">
+        <span>Email or username</span>
+        <input type="text" id="member-identifier" placeholder="person@email.com" required />
+      </label>
+      <label class="field">
+        <span>Role</span>
+        <select id="member-role">
+          <option value="member">Member — can view work and manage their own tasks</option>
+          <option value="admin">Admin — can also manage members and tasks</option>
+        </select>
+      </label>
+      <div class="form-actions">
+        <div class="spacer"></div>
+        <button type="button" class="btn btn-ghost" id="member-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add member</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit profile modal -->
+<div class="modal-backdrop" id="profile-modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Edit profile</h2>
+      <button class="icon-btn" id="profile-modal-close" aria-label="Close">✕</button>
+    </div>
+    <form id="profile-form" class="form">
+      <!-- Profile Avatar Section -->
+      <div class="profile-avatar-upload-wrap" style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:12px;background:var(--bg-subtle,#f8fafc);border-radius:10px;border:1px solid var(--border,#e2e8f0);">
+        <div id="profile-avatar-preview" class="avatar-lg" style="width:64px;height:64px;font-size:22px;flex-shrink:0;overflow:hidden;border-radius:50%;background:var(--accent,#2563eb);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">
+          D
+        </div>
+        <div style="flex:1;">
+          <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">Profile Photo</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="btn btn-sm btn-ghost" id="profile-upload-btn" style="border:1px solid var(--border);padding:6px 12px;font-size:12.5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Upload Image</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-danger" id="profile-remove-avatar-btn" style="padding:6px 10px;font-size:12px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</button>
+            <input type="file" id="profile-avatar-file" accept="image/*" style="display:none;" />
+          </div>
+          <span class="muted" style="font-size:11.5px;display:block;margin-top:4px;">Upload JPG, PNG or WebP image from your computer, or paste a link below.</span>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>Full name</span>
+        <input type="text" id="profile-name" required />
+      </label>
+      <label class="field">
+        <span>Username</span>
+        <input type="text" id="profile-username" required />
+      </label>
+      <label class="field">
+        <span>Email <em>(can't be changed here)</em></span>
+        <input type="email" id="profile-email" disabled />
+      </label>
+      <label class="field">
+        <span>Mobile number</span>
+        <input type="tel" id="profile-mobile" />
+      </label>
+      <label class="field">
+        <span>Role / designation</span>
+        <input type="text" id="profile-designation" placeholder="e.g. Product Designer" />
+      </label>
+      <label class="field">
+        <span>Short bio</span>
+        <textarea id="profile-bio" rows="2" placeholder="A line about you"></textarea>
+      </label>
+      <label class="field">
+        <span>Or paste Avatar Image URL <em>(optional)</em></span>
+        <input type="url" id="profile-avatar-url" placeholder="https://example.com/avatar.jpg" />
+      </label>
+      <div class="form-actions">
+        <div class="spacer"></div>
+        <button type="button" class="btn btn-ghost" id="profile-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save profile</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change password modal -->
+<div class="modal-backdrop" id="password-modal-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Change password</h2>
+      <button class="icon-btn" id="password-modal-close" aria-label="Close">✕</button>
+    </div>
+    <form id="password-form" class="form">
+      <label class="field">
+        <span>Current password</span>
+        <div class="password-input-wrap">
+          <input type="password" id="current-password" autocomplete="current-password" />
+          <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+            <svg class="eye-icon eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg class="eye-icon eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
+        </div>
+      </label>
+      <label class="field">
+        <span>New password</span>
+        <div class="password-input-wrap">
+          <input type="password" id="new-password" minlength="8" required autocomplete="new-password" />
+          <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+            <svg class="eye-icon eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg class="eye-icon eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
+        </div>
+      </label>
+      <div class="form-actions">
+        <div class="spacer"></div>
+        <button type="button" class="btn btn-ghost" id="password-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Appearance / color theme modal -->
+<div class="modal-backdrop" id="appearance-modal-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Appearance</h2>
+      <button class="icon-btn" id="appearance-modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="form">
+      <label class="field" style="margin-bottom:4px;">
+        <span>Color Theme</span>
+      </label>
+      <div class="theme-option-list" id="theme-option-list"><!-- rendered by app.js --></div>
+      <p class="muted" style="font-size:12px;margin:10px 0 0;">Applies immediately and is saved to your account, so it follows you when you sign in elsewhere.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Notification settings modal -->
+<div class="modal-backdrop" id="notif-modal-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Notification settings</h2>
+      <button class="icon-btn" id="notif-modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="form">
+      <label class="toggle-row">
+        <span>Email Notifications (Master Switch)</span>
+        <input type="checkbox" id="notif-email" />
+      </label>
+      <label class="toggle-row">
+        <span>Task Assignment Emails</span>
+        <input type="checkbox" id="notif-assignment" />
+      </label>
+      <label class="toggle-row">
+        <span>Due-Date Reminders (24h &amp; 1h)</span>
+        <input type="checkbox" id="notif-due-reminders" />
+      </label>
+      <label class="toggle-row">
+        <span>Overdue Task Alerts</span>
+        <input type="checkbox" id="notif-overdue" />
+      </label>
+      <label class="toggle-row">
+        <span>Team Invitation Emails</span>
+        <input type="checkbox" id="notif-team-invites" />
+      </label>
+      <div class="form-actions">
+        <div class="spacer"></div>
+        <button type="button" class="btn btn-primary" id="notif-save-btn">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Detail / Quick Edit Modal -->
+<div class="modal-backdrop" id="activity-detail-modal-backdrop" hidden>
+  <div class="modal modal-lg" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="detail-priority-badge" class="badge">Normal</span>
+        <span id="detail-status-badge" class="badge">To Do</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="btn btn-sm btn-ghost" id="detail-edit-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Edit</button>
+        <button class="btn btn-sm btn-ghost btn-danger" id="detail-delete-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete</button>
+        <button class="btn btn-sm btn-primary" id="detail-complete-btn">✓ Mark Complete</button>
+        <button class="icon-btn" id="activity-detail-close" aria-label="Close">✕</button>
+      </div>
+    </div>
+    <div class="activity-detail-body" id="activity-detail-body">
+      <!-- dynamic detail content: title, assignee, due date, description, checklist, comments -->
+    </div>
+  </div>
+</div>
+
+<!-- Member View / Spotlight Modal -->
+<div class="modal-backdrop" id="member-detail-modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Member Profile &amp; Activities</h2>
+      <button class="icon-btn" id="member-detail-close" aria-label="Close">✕</button>
+    </div>
+    <div class="member-detail-body" id="member-detail-body">
+      <!-- dynamic member content -->
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-backdrop" id="confirm-modal-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2 id="confirm-modal-title">Confirm Action</h2>
+      <button class="icon-btn" id="confirm-modal-close" aria-label="Close">✕</button>
+    </div>
+    <div style="padding:16px 20px;">
+      <p id="confirm-modal-message" style="font-size:14px;color:var(--text);margin-bottom:20px;line-height:1.5;">Are you sure?</p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="confirm-modal-cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-modal-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Monthly Report Modal -->
+<div class="modal-backdrop modal-backdrop-report" id="report-modal-backdrop" hidden>
+  <div class="modal modal-lg modal-report" role="dialog" aria-modal="true">
+    <div class="modal-head modal-head-report">
+      <div class="report-head-title">
+        <h2>Monthly Performance &amp; Activity Report</h2>
+        <p class="muted" style="margin:2px 0 0;font-size:13px;" id="report-team-subtitle">Executive Team Report</p>
+      </div>
+      <div class="report-controls">
+        <label for="report-month-select" style="font-size:13px;font-weight:600;">Period:</label>
+        <select id="report-month-select" class="form-select-sm"></select>
+        <button type="button" class="btn btn-sm btn-primary" id="report-print-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Print / Save PDF</button>
+        <button type="button" class="btn btn-sm btn-ghost" id="report-export-csv-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export CSV</button>
+        <button class="icon-btn" id="report-modal-close" aria-label="Close">✕</button>
+      </div>
+    </div>
+    <div class="report-body" id="report-printable-area">
+      <!-- Generated Report Details -->
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="/app.js" defer></script>
+</body>
+</html>

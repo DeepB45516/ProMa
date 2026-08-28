@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: startup-project-manager
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false   # set this to your Neon/Postgres connection string in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true   # required in production to call POST /api/internal/process-reminders (send as the X-Cron-Secret header)
+      - key: APP_URL
+        sync: false   # set this to your live Render URL (e.g. https://your-app.onrender.com) once you know it.
+                       # Without this, links inside task-assignment, team-invite, and password-reset
+                       # emails will point at http://localhost:3000 and won't work for real users.
+      # Optional — only needed if you want real emails delivered instead of
+      # just logged to the server console. Set ONE of these two groups:
+      #   Resend:  RESEND_API_KEY
+      #   Gmail/SMTP: SMTP_USER, SMTP_PASS (and optionally SMTP_HOST/SMTP_PORT/SENDER_EMAIL)
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      # Optional — only needed if you want "Continue with Google" enabled:
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+    autoDeploy: true

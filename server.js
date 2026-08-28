@@ -18,6 +18,7 @@ const dashboardRoutes = require("./routes/dashboard");
 const notificationsRoutes = require("./routes/notifications");
 const remindersRoutes = require("./routes/reminders");
 const { processTaskReminders } = require("./lib/reminders");
+const { getHealthStatus, startUptimeHeartbeat } = require("./lib/uptimeRobot");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,11 +45,17 @@ app.use(
     },
   })
 );
-// Lightweight health endpoint for Render and any external uptime monitor.
+
+// Zero-load health endpoints for UptimeRobot, Render, and external uptime monitors.
 // Intentionally does NOT touch the database, run auth, or call any
-// external API — it must stay cheap enough to hit every few minutes.
+// external API — it responds in < 1ms with 0 database load.
 // Mounted before attachUser so it never depends on session/DB state.
-app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.all(["/health", "/ping"], (req, res) => {
+  if (req.method === "HEAD") {
+    return res.status(200).end();
+  }
+  res.status(200).json(getHealthStatus());
+});
 
 app.use(attachUser);
 
@@ -60,7 +67,7 @@ app.use("/api/teams/:teamId/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/internal", remindersRoutes);
 
-app.get("/api/health", (req, res) => res.json({ ok: true }));
+app.get("/api/health", (req, res) => res.json(getHealthStatus()));
 
 // API 404 handler — unmatched /api calls return clean JSON error instead of HTML
 app.use("/api", (req, res) => {
@@ -99,6 +106,12 @@ initSchema()
           console.warn("Background reminder processor error:", e.message);
         }
       }, 10 * 1000);
+
+      // Start automated UptimeRobot zero-load health check heartbeat (every 5-7 minutes)
+      // Keeps free cloud tiers responsive with near-zero resource consumption.
+      if (process.env.ENABLE_UPTIME_HEARTBEAT !== "false") {
+        startUptimeHeartbeat({ port: PORT, minMinutes: 5, maxMinutes: 7 });
+      }
 
       setInterval(async () => {
         try {

@@ -234,6 +234,8 @@ router.post("/login", rateLimit("login", 10, 15 * 60 * 1000), async (req, res, n
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: "Incorrect email/username or password." });
 
+    await attachPendingInvites(user.id, user.email);
+
     setAuthCookie(res, user.id);
     res.json({ user: publicUser(user) });
   } catch (e) {
@@ -466,6 +468,8 @@ router.get("/google/callback", async (req, res, next) => {
         user.id,
       ]);
     }
+
+    await attachPendingInvites(user.id, user.email);
 
     setAuthCookie(res, user.id);
     res.redirect("/");

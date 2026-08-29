@@ -879,6 +879,31 @@
   </div>
 </div>
 
+<!-- Invite Success Modal -->
+<div class="modal-backdrop" id="invite-success-modal-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Invitation Created</h2>
+      <button class="icon-btn" id="invite-success-modal-close" aria-label="Close">✕</button>
+    </div>
+    <div style="padding:4px 0 16px;">
+      <p id="invite-success-msg" style="font-size:13.5px;color:var(--text);margin:0 0 14px;line-height:1.5;">An invitation has been generated.</p>
+      <label class="field" style="margin-bottom:12px;">
+        <span style="font-size:12px;font-weight:600;color:var(--muted);">Direct Invite Link:</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="invite-success-link-input" readonly style="font-family:var(--font-mono);font-size:12px;background:var(--bg-subtle,#f8fafc);cursor:pointer;" />
+          <button type="button" class="btn btn-sm btn-primary" id="invite-success-copy-btn" style="flex-shrink:0;">Copy Link</button>
+        </div>
+      </label>
+      <p class="muted" style="font-size:12px;margin:0;line-height:1.4;">Share this link directly with the member. They can click it to sign up or log in and join the workspace.</p>
+    </div>
+    <div class="form-actions" style="margin-top:12px;">
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-primary" id="invite-success-done-btn">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- Edit profile modal -->
 <div class="modal-backdrop" id="profile-modal-backdrop" hidden>
   <div class="modal" role="dialog" aria-modal="true">

@@ -3353,22 +3353,82 @@ function renderSettings() {
   if (isAdmin && pendingInvites.length > 0) {
     const invPanel = document.createElement("div");
     invPanel.className = "panel settings-section";
-    invPanel.innerHTML = `<div class="panel-head"><h2>Pending invites</h2></div><div id="invite-list" style="display:flex;flex-direction:column;gap:8px;"></div>`;
+    invPanel.innerHTML = `<div class="panel-head"><h2>Pending invites (${pendingInvites.length})</h2></div><div id="invite-list" style="display:flex;flex-direction:column;gap:8px;"></div>`;
     root.appendChild(invPanel);
     const invList = $("#invite-list", invPanel);
     pendingInvites.forEach((inv) => {
       const row = document.createElement("div");
       row.className = "invite-row";
-      row.innerHTML = `<span class="inv-email">${escapeHtml(inv.email)}</span><span class="inv-tag">Pending</span><button data-cancel-invite="${inv.id}" class="icon-btn" title="Cancel invite">✕</button>`;
+      row.style.display = "flex";
+      row.style.alignItems = "center";
+      row.style.justifyContent = "space-between";
+      row.style.padding = "10px 14px";
+      row.style.background = "var(--surface)";
+      row.style.border = "1px solid var(--border)";
+      row.style.borderRadius = "8px";
+      row.style.gap = "8px";
+      row.style.flexWrap = "wrap";
+
+      const inviteUrl = inv.token ? `${window.location.origin}/?invite=${inv.token}` : "";
+
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:180px;">
+          <span class="inv-email" style="font-weight:600;font-size:13.5px;">${escapeHtml(inv.email)}</span>
+          <span class="badge badge-normal" style="font-size:11px;text-transform:capitalize;">${escapeHtml(inv.role || "member")}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          ${inviteUrl ? `<button class="btn btn-xs btn-ghost btn-copy-invite" data-invite-link="${escapeHtml(inviteUrl)}" title="Copy Invite Link" style="border:1px solid var(--border);font-size:12px;">📋 Copy Link</button>` : ""}
+          <button class="btn btn-xs btn-ghost btn-resend-invite" data-invite-id="${inv.id}" title="Resend Invite Email" style="border:1px solid var(--border);font-size:12px;">✉ Resend</button>
+          <button data-cancel-invite="${inv.id}" class="icon-btn" title="Cancel invite" style="font-size:12px;color:var(--danger,#ef4444);margin-left:4px;">✕</button>
+        </div>
+      `;
       invList.appendChild(row);
     });
+
     invList.addEventListener("click", async (e) => {
-      const btn = e.target.closest("[data-cancel-invite]");
-      if (!btn) return;
-      await api(`/teams/${state.currentTeamId}/invites/${btn.dataset.cancelInvite}`, { method: "DELETE" });
-      toast("Invite cancelled");
-      removeTeamBundleFromCache(state.currentTeamId);
-      await refreshTeamData();
+      const copyBtn = e.target.closest(".btn-copy-invite");
+      if (copyBtn) {
+        const link = copyBtn.dataset.inviteLink;
+        if (link) {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(link).then(() => {
+              toast("Invite link copied to clipboard!");
+            }).catch(() => {
+              prompt("Copy this invite link:", link);
+            });
+          } else {
+            prompt("Copy this invite link:", link);
+          }
+        }
+        return;
+      }
+
+      const resendBtn = e.target.closest(".btn-resend-invite");
+      if (resendBtn) {
+        resendBtn.disabled = true;
+        try {
+          const res = await api(`/teams/${state.currentTeamId}/invites/${resendBtn.dataset.inviteId}/resend`, { method: "POST" });
+          toast(res.message || "Invitation resent!");
+        } catch (err) {
+          toast(err.message || "Failed to resend invite");
+        } finally {
+          resendBtn.disabled = false;
+        }
+        return;
+      }
+
+      const cancelBtn = e.target.closest("[data-cancel-invite]");
+      if (cancelBtn) {
+        if (!confirm("Cancel this invitation?")) return;
+        try {
+          await api(`/teams/${state.currentTeamId}/invites/${cancelBtn.dataset.cancelInvite}`, { method: "DELETE" });
+          toast("Invite cancelled");
+          removeTeamBundleFromCache(state.currentTeamId);
+          await refreshTeamData();
+        } catch (err) {
+          toast(err.message);
+        }
+      }
     });
   }
 
@@ -3641,6 +3701,18 @@ function openMemberModal() {
 }
 function closeMemberModal() { $("#member-modal-backdrop").hidden = true; }
 
+function openInviteSuccessModal(message, inviteLink) {
+  if ($("#invite-success-msg")) $("#invite-success-msg").textContent = message || "An invitation has been generated.";
+  if ($("#invite-success-link-input")) $("#invite-success-link-input").value = inviteLink || window.location.origin;
+  $("#invite-success-modal-backdrop").hidden = false;
+  setTimeout(() => {
+    $("#invite-success-link-input")?.select();
+  }, 100);
+}
+function closeInviteSuccessModal() {
+  $("#invite-success-modal-backdrop").hidden = true;
+}
+
 async function handleMemberSubmit(e) {
   e.preventDefault();
   const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -3651,11 +3723,17 @@ async function handleMemberSubmit(e) {
       method: "POST",
       body: JSON.stringify({ identifier: $("#member-identifier").value.trim(), role: $("#member-role").value }),
     });
-    if (result.added) toast("Member added");
-    else if (result.invited) toast(`Invite created — share this link: ${result.inviteLink}`);
     closeMemberModal();
     removeTeamBundleFromCache(state.currentTeamId);
     await refreshTeamData();
+
+    if (result.added) {
+      toast("Member added to team!");
+    } else if (result.invited || result.inviteLink) {
+      openInviteSuccessModal(result.message, result.inviteLink);
+    } else {
+      toast("Invitation sent!");
+    }
   } catch (err) {
     toast(err.message);
   } finally {
@@ -4308,6 +4386,33 @@ function wireModals() {
   $("#member-modal-backdrop").addEventListener("click", (e) => { if (e.target.id === "member-modal-backdrop") closeMemberModal(); });
   $("#member-form").addEventListener("submit", handleMemberSubmit);
 
+  $("#invite-success-modal-close")?.addEventListener("click", closeInviteSuccessModal);
+  $("#invite-success-done-btn")?.addEventListener("click", closeInviteSuccessModal);
+  $("#invite-success-modal-backdrop")?.addEventListener("click", (e) => {
+    if (e.target.id === "invite-success-modal-backdrop") closeInviteSuccessModal();
+  });
+  $("#invite-success-copy-btn")?.addEventListener("click", () => {
+    const input = $("#invite-success-link-input");
+    if (input && input.value) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(input.value).then(() => {
+          toast("Invite link copied to clipboard!");
+        }).catch(() => {
+          input.select();
+          document.execCommand("copy");
+          toast("Invite link copied!");
+        });
+      } else {
+        input.select();
+        document.execCommand("copy");
+        toast("Invite link copied!");
+      }
+    }
+  });
+  $("#invite-success-link-input")?.addEventListener("click", (e) => {
+    e.target.select();
+  });
+
   $("#profile-modal-close").addEventListener("click", closeProfileModal);
   $("#profile-cancel-btn").addEventListener("click", closeProfileModal);
   $("#profile-modal-backdrop").addEventListener("click", (e) => { if (e.target.id === "profile-modal-backdrop") closeProfileModal(); });
@@ -4596,9 +4701,13 @@ async function init() {
 
   // Handle invite deep link / Google OAuth error surfaced via query params
   const params = new URLSearchParams(window.location.search);
-  if (params.get("invite")) {
-    openAuth("signup");
-    showAuthBanner("You've been invited to a team — sign up or log in with the email address the invite was sent to, and you'll join automatically.", "success");
+  const inviteToken = params.get("invite");
+  if (inviteToken) {
+    try { localStorage.setItem("proma:pendingInviteToken", inviteToken); } catch (e) {}
+    if (!state.user && !hasCachedSession) {
+      openAuth("signup");
+      showAuthBanner("You've been invited to join a team! Create an account or sign in to accept your invitation.", "success");
+    }
   }
   if (params.get("authError")) {
     openAuth("login");
@@ -4611,6 +4720,20 @@ async function init() {
     state.user = user;
     if (user?.color_theme) applyColorTheme(user.color_theme);
     await bootApp();
+
+    if (inviteToken && state.user) {
+      // Re-fetch pending invites and teams so newly attached teams show immediately
+      const [teams, invites] = await Promise.all([
+        api("/users/me/teams").catch(() => state.teams),
+        api("/users/me/invites").catch(() => []),
+      ]);
+      state.teams = teams;
+      state.pendingTeamInvites = invites;
+      renderCurrentView();
+      if (invites.length > 0) {
+        toast("You have pending team invitations ready to accept!");
+      }
+    }
   } catch (e) {
     // If not authenticated, clear invalid cached session and show landing page
     if (hasCachedSession) {

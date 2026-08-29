@@ -87,7 +87,7 @@ router.get("/:teamId/bundle", async (req, res, next) => {
         [teamId]
       ),
       pool.query(
-        `SELECT id, email, role, created_at FROM team_invites WHERE team_id = $1 AND status = 'pending'`,
+        `SELECT id, email, role, token, created_at FROM team_invites WHERE team_id = $1 AND status = 'pending'`,
         [teamId]
       ),
       pool.query(
@@ -302,7 +302,7 @@ router.get("/:teamId/members", requireTeamMember, async (req, res, next) => {
       [req.params.teamId]
     );
     const { rows: invites } = await pool.query(
-      `SELECT id, email, role, created_at FROM team_invites WHERE team_id = $1 AND status = 'pending'`,
+      `SELECT id, email, role, token, created_at FROM team_invites WHERE team_id = $1 AND status = 'pending'`,
       [req.params.teamId]
     );
     res.json({ members: rows, pendingInvites: invites });
@@ -414,6 +414,8 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
         [inviteId, req.params.teamId, targetUser.email, assignRole, token, req.user.id]
       );
 
+      const inviteUrl = `${process.env.APP_URL || "http://localhost:3000"}/?invite=${token}`;
+
       // Send email if user has notif_email and notif_team_invites enabled.
       // Dispatched in the background so adding a member responds instantly
       // instead of waiting on the mail provider.
@@ -427,7 +429,7 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
               to: targetUser.email,
               teamName,
               invitedBy: req.user.full_name,
-              inviteUrl: process.env.APP_URL || "http://localhost:3000",
+              inviteUrl,
             }),
         }).catch(() => {});
       }
@@ -446,7 +448,8 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
         added: false,
         invited: true,
         userExists: true,
-        message: `Invitation sent to ${targetUser.full_name}.`,
+        inviteLink: inviteUrl,
+        message: `Invitation sent to ${targetUser.full_name} (${targetUser.email}).`,
       });
     }
 
@@ -529,6 +532,30 @@ router.delete("/:teamId/members/:userId", requireTeamMember, requireTeamAdmin, a
       [req.params.teamId, req.params.userId]
     );
     res.json({ ok: true });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/:teamId/invites/:inviteId/resend", requireTeamMember, requireTeamAdmin, async (req, res, next) => {
+  try {
+    const { rows: invites } = await pool.query(
+      `SELECT i.*, t.name AS team_name FROM team_invites i JOIN teams t ON t.id = i.team_id WHERE i.id = $1 AND i.team_id = $2 AND i.status = 'pending'`,
+      [req.params.inviteId, req.params.teamId]
+    );
+    const invite = invites[0];
+    if (!invite) return res.status(404).json({ error: "Pending invitation not found." });
+
+    const inviteUrl = `${process.env.APP_URL || "http://localhost:3000"}/?invite=${invite.token}`;
+
+    sendTeamInviteEmail({
+      to: invite.email,
+      teamName: invite.team_name,
+      invitedBy: req.user.full_name,
+      inviteUrl,
+    }).catch((err) => console.error("[email] Team invite resend failed:", err.message));
+
+    res.json({ ok: true, inviteLink: inviteUrl, message: `Invitation resent to ${invite.email}.` });
   } catch (e) {
     next(e);
   }

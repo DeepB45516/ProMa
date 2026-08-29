@@ -866,8 +866,8 @@
       <label class="field">
         <span>Role</span>
         <select id="member-role">
-          <option value="member">Member — can view work and manage their own tasks</option>
-          <option value="admin">Admin — can also manage members and tasks</option>
+          <option value="member">Member — can view work & manage tasks</option>
+          <option value="admin">Admin — can manage team & members</option>
         </select>
       </label>
       <div class="form-actions">
@@ -890,8 +890,8 @@
       <p id="invite-success-msg" style="font-size:13.5px;color:var(--text);margin:0 0 14px;line-height:1.5;">An invitation has been generated.</p>
       <label class="field" style="margin-bottom:12px;">
         <span style="font-size:12px;font-weight:600;color:var(--muted);">Direct Invite Link:</span>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" id="invite-success-link-input" readonly style="font-family:var(--font-mono);font-size:12px;background:var(--bg-subtle,#f8fafc);cursor:pointer;" />
+        <div class="invite-link-box" style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="invite-success-link-input" readonly style="font-family:var(--font-mono);font-size:12px;background:var(--bg-subtle,#f8fafc);cursor:pointer;flex:1;min-width:0;padding:8px 10px;" />
           <button type="button" class="btn btn-sm btn-primary" id="invite-success-copy-btn" style="flex-shrink:0;">Copy Link</button>
         </div>
       </label>

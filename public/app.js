@@ -3308,17 +3308,21 @@ function renderSettings() {
       const isOwner = m.role === "owner";
       const canManage = isAdmin && m.id !== state.user?.id;
       row.innerHTML = `
-        <span class="avatar">${initials(m.full_name)}</span>
-        <span class="m-name">${escapeHtml(m.full_name)} <span class="muted" style="font-weight:500;">${m.id === state.user?.id ? "(you)" : ""}</span></span>
-        ${
-          canManage && !isOwner
-            ? `<select class="role-select" data-user-id="${m.id}">
-                 <option value="member" ${m.role === "member" ? "selected" : ""}>Member</option>
-                 <option value="admin" ${m.role === "admin" ? "selected" : ""}>Admin</option>
-               </select>`
-            : `<span class="m-count" style="text-transform:capitalize;">${m.role}</span>`
-        }
-        ${canManage && !isOwner ? `<button data-remove-user="${m.id}" title="Remove member">✕</button>` : ""}
+        <div class="member-info-col" style="display:flex;align-items:center;gap:10px;flex:1;min-width:120px;overflow:hidden;">
+          <span class="avatar">${initials(m.full_name)}</span>
+          <span class="m-name">${escapeHtml(m.full_name)} <span class="muted" style="font-weight:500;">${m.id === state.user?.id ? "(you)" : ""}</span></span>
+        </div>
+        <div class="member-actions-col" style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          ${
+            canManage && !isOwner
+              ? `<select class="role-select" data-user-id="${m.id}" aria-label="Member role">
+                   <option value="member" ${m.role === "member" ? "selected" : ""}>Member</option>
+                   <option value="admin" ${m.role === "admin" ? "selected" : ""}>Admin</option>
+                 </select>`
+              : `<span class="m-count" style="text-transform:capitalize;">${m.role}</span>`
+          }
+          ${canManage && !isOwner ? `<button data-remove-user="${m.id}" title="Remove member" class="icon-btn" style="color:var(--overdue);padding:4px 6px;">✕</button>` : ""}
+        </div>
       `;
       mList.appendChild(row);
     });
@@ -3359,24 +3363,15 @@ function renderSettings() {
     pendingInvites.forEach((inv) => {
       const row = document.createElement("div");
       row.className = "invite-row";
-      row.style.display = "flex";
-      row.style.alignItems = "center";
-      row.style.justifyContent = "space-between";
-      row.style.padding = "10px 14px";
-      row.style.background = "var(--surface)";
-      row.style.border = "1px solid var(--border)";
-      row.style.borderRadius = "8px";
-      row.style.gap = "8px";
-      row.style.flexWrap = "wrap";
 
       const inviteUrl = inv.token ? `${window.location.origin}/?invite=${inv.token}` : "";
 
       row.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:180px;">
+        <div class="invite-info-col" style="display:flex;align-items:center;gap:8px;flex:1;min-width:140px;">
           <span class="inv-email" style="font-weight:600;font-size:13.5px;">${escapeHtml(inv.email)}</span>
           <span class="badge badge-normal" style="font-size:11px;text-transform:capitalize;">${escapeHtml(inv.role || "member")}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <div class="invite-actions-col" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
           ${inviteUrl ? `<button class="btn btn-xs btn-ghost btn-copy-invite" data-invite-link="${escapeHtml(inviteUrl)}" title="Copy Invite Link" style="border:1px solid var(--border);font-size:12px;">📋 Copy Link</button>` : ""}
           <button class="btn btn-xs btn-ghost btn-resend-invite" data-invite-id="${inv.id}" title="Resend Invite Email" style="border:1px solid var(--border);font-size:12px;">✉ Resend</button>
           <button data-cancel-invite="${inv.id}" class="icon-btn" title="Cancel invite" style="font-size:12px;color:var(--danger,#ef4444);margin-left:4px;">✕</button>

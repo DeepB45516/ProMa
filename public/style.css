@@ -1113,11 +1113,27 @@ a{ color: var(--accent); }
 
 /* Responsive adjustments */
 @media (max-width: 768px){
+  .auth-wrap{ padding: 12px 10px; align-items: center; justify-content: center; }
   .auth-card{
-    grid-template-columns: 1fr; max-width: 440px; border-radius: 16px;
+    grid-template-columns: 1fr; max-width: 440px; width: 100%; border-radius: 16px;
+    padding: 0; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
   }
   .auth-showcase{ display: none; }
-  .auth-form-side{ padding: 30px 22px; }
+  .auth-form-side{ padding: 26px 20px; width: 100%; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
+  .auth-close-btn{ top: 12px; right: 12px; }
+}
+
+@media (max-width: 480px){
+  .auth-wrap{ padding: 8px; }
+  .auth-card{ border-radius: 14px; max-width: 100%; }
+  .auth-form-side{ padding: 22px 16px; }
+  .auth-brand{ margin-bottom: 14px; }
+  .auth-heading-wrap{ margin-bottom: 14px; }
+  .auth-heading-wrap h1{ font-size: 19px; }
+  .auth-heading-wrap .muted{ font-size: 12.5px; }
+  .auth-social-row{ grid-template-columns: 1fr; gap: 8px; }
+  .btn-google, .auth-mobile-btn{ height: 42px; font-size: 13px; }
+  .auth-submit-btn{ height: 42px; font-size: 13.5px; }
 }
 
 /* ---------- team switcher ---------- */
@@ -1341,9 +1357,42 @@ a{ color: var(--accent); }
   .comment-add-box{ flex-direction:column; }
   .comment-add-box .btn{ align-self:flex-end; }
 
-  /* — Auth card — */
-  .auth-card{ max-width:100%; padding:24px 18px; }
-  .auth-panel h1{ font-size:19px; }
+  /* — Team settings & Member management — */
+  .settings-section{ padding: 16px 14px; margin-bottom: 14px; }
+  .member-list{ gap: 8px; }
+  .member-row{
+    flex-wrap: wrap; gap: 8px; padding: 10px 12px; justify-content: space-between;
+  }
+  .member-info-col{
+    min-width: 120px;
+  }
+  .member-row .m-name{
+    font-size: 13.5px; word-break: break-word;
+  }
+  .member-actions-col{
+    margin-left: auto; gap: 6px;
+  }
+  .member-row .role-select{
+    height: 30px; padding: 3px 6px; font-size: 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  }
+  .invite-row{
+    flex-direction: column; align-items: stretch; gap: 8px; padding: 12px;
+  }
+  .invite-info-col{
+    justify-content: space-between; width: 100%;
+  }
+  .invite-actions-col{
+    width: 100%; justify-content: flex-end; border-top: 1px solid var(--border);
+    padding-top: 8px; margin-top: 2px;
+  }
+  .invite-link-box{
+    flex-direction: column; align-items: stretch !important; gap: 8px !important;
+  }
+  .invite-link-box button{
+    width: 100%;
+  }
+  .danger-zone{ padding:12px; }
 
   /* — Notification dropdown — */
   .notif-dropdown{ width:calc(100vw - 28px); right:-60px; }
@@ -1372,9 +1421,6 @@ a{ color: var(--accent); }
 
   /* — Toast centered — */
   .toast{ left:14px; right:14px; transform:none; text-align:center; }
-
-  /* — Team settings — */
-  .danger-zone{ padding:12px; }
 
   /* — Team hub card — */
   .team-hub-card-new{ min-height:160px; }
@@ -1639,7 +1685,64 @@ a{ color: var(--accent); }
 .badge-priority-high { background: #FEF4E6; color: #B45309; }
 .badge-priority-urgent { background: #FEE2E2; color: #DC2626; font-weight: 700; }
 
-/* ---------- Notification Bell & Dropdown ---------- */
+/* ---------- Notification Bell & Theme Toggle Symbols ---------- */
+#topbar-notif-btn,
+#theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+#topbar-notif-btn:hover,
+#theme-toggle-btn:hover {
+  background: var(--surface-hover);
+  color: var(--accent);
+  border-color: var(--border-strong);
+}
+
+#topbar-notif-btn svg,
+#theme-toggle-btn svg,
+#theme-toggle-icon svg,
+#pm-theme-icon svg {
+  stroke: currentColor;
+  color: inherit;
+  display: block;
+}
+
+[data-theme="dark"] #topbar-notif-btn,
+[data-theme="dark"] #theme-toggle-btn {
+  background: #1A1F35;
+  border-color: #2D3458;
+  color: #F1F3F9;
+}
+
+[data-theme="dark"] #topbar-notif-btn:hover,
+[data-theme="dark"] #theme-toggle-btn:hover {
+  background: #252B45;
+  color: var(--accent, #818CF8);
+  border-color: var(--border-strong, #4F46E5);
+}
+
+[data-theme="dark"] #pm-theme-icon,
+[data-theme="dark"] #pm-theme-icon svg,
+[data-theme="dark"] #pm-theme-toggle {
+  color: #F1F3F9;
+}
+
+[data-theme="dark"] #pm-theme-toggle:hover svg {
+  color: var(--accent, #818CF8);
+}
+
 .notif-badge {
   position: absolute;
   top: -2px;

@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const { pool } = require("../db/pool");
 const { setAuthCookie, clearAuthCookie, requireAuth } = require("../middleware/auth");
 const { sendVerificationOtpEmail, sendPasswordResetEmail } = require("../lib/email");
+const { rateLimit } = require("../lib/rateLimit");
 
 const router = express.Router();
 const genId = () => crypto.randomUUID();
@@ -29,7 +30,7 @@ router.post("/check-email", async (req, res, next) => {
 });
 
 // ---------- email OTP send & verify ----------
-router.post("/otp/email/send", async (req, res, next) => {
+router.post("/otp/email/send", rateLimit("otp-email-send", 5, 15 * 60 * 1000), async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!isValidEmail(email)) {
@@ -75,7 +76,7 @@ router.post("/otp/email/send", async (req, res, next) => {
   }
 });
 
-router.post("/otp/email/verify", async (req, res, next) => {
+router.post("/otp/email/verify", rateLimit("otp-email-verify", 10, 15 * 60 * 1000), async (req, res, next) => {
   try {
     const { email, code, fullName, password, username } = req.body;
     if (!isValidEmail(email)) {
@@ -180,7 +181,7 @@ async function uniqueUsername(base) {
 }
 
 // ---------- signup ----------
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", rateLimit("signup", 10, 15 * 60 * 1000), async (req, res, next) => {
   try {
     const { fullName, username, email, password } = req.body;
     if (!fullName?.trim() || !email?.trim() || !password) {
@@ -215,7 +216,7 @@ router.post("/signup", async (req, res, next) => {
 });
 
 // ---------- login ----------
-router.post("/login", async (req, res, next) => {
+router.post("/login", rateLimit("login", 10, 15 * 60 * 1000), async (req, res, next) => {
   try {
     const { identifier, password } = req.body;
     if (!identifier?.trim() || !password) {
@@ -252,7 +253,7 @@ router.get("/me", requireAuth, (req, res) => {
 });
 
 // ---------- forgot / reset password ----------
-router.post("/forgot-password", async (req, res, next) => {
+router.post("/forgot-password", rateLimit("forgot-password", 5, 15 * 60 * 1000), async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email?.trim()) return res.status(400).json({ error: "Enter your account email." });
@@ -326,8 +327,17 @@ router.post("/reset-password", async (req, res, next) => {
 });
 
 // ---------- mobile OTP login ----------
-router.post("/otp/send", async (req, res, next) => {
+router.post("/otp/send", rateLimit("otp-send", 5, 15 * 60 * 1000), async (req, res, next) => {
   try {
+    // No SMS provider is wired up yet. Returning/logging the code (as this
+    // route used to) would let anyone log into any phone number's account
+    // without ever receiving a text, so mobile OTP login is disabled in
+    // production until a real SMS provider (Twilio / MSG91 / etc.) is
+    // added. It still works in development for convenience.
+    if (!isDev) {
+      return res.status(503).json({ error: "Mobile sign-in isn't available yet. Please use email instead." });
+    }
+
     const { mobile } = req.body;
     if (!mobile?.trim()) return res.status(400).json({ error: "Enter a mobile number." });
     const clean = mobile.trim();
@@ -342,9 +352,6 @@ router.post("/otp/send", async (req, res, next) => {
     ]);
     console.log(`[otp] code for ${clean}: ${code}`);
 
-    // No SMS provider is configured, so the code is returned directly for
-    // demo purposes. Wire up Twilio / MSG91 / etc. and remove `code` from
-    // the response before going to production.
     res.json({
       ok: true,
       message: "Verification code created.",

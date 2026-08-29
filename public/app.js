@@ -1446,7 +1446,7 @@ function renderMainPage() {
       card.innerHTML = `
         <div class="team-hub-card-head">
           <div class="team-hub-card-title">
-            <span class="icon">${t.icon || '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>'}</span>
+            <span class="icon">${t.icon ? escapeHtml(t.icon) : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>'}</span>
             <div>
               <h3>${escapeHtml(t.name)}</h3>
             </div>

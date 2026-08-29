@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const { pool } = require("../db/pool");
 const { requireAuth, requireTeamMember, requireTeamAdmin } = require("../middleware/auth");
 const { enrichTask } = require("../lib/taskStatus");
+const { computeDashboardStats } = require("../lib/dashboardStats");
 const { sendTeamInviteEmail } = require("../lib/email");
 const { createNotification } = require("../lib/notifications");
 const { dispatchTrackedEmail } = require("../lib/emailTracking");
@@ -11,6 +12,17 @@ const { dispatchTrackedEmail } = require("../lib/emailTracking");
 const router = express.Router();
 const genId = () => crypto.randomUUID();
 router.use(requireAuth);
+
+// The frontend renders team.icon with innerHTML (it's meant to hold a single
+// emoji), so it must never be allowed to carry HTML/script content. Keep it
+// short and reject anything containing '<' — a single emoji never needs it.
+function cleanIcon(icon, fallback) {
+  if (!icon || typeof icon !== "string") return fallback;
+  const trimmed = icon.trim();
+  if (!trimmed) return fallback;
+  if (trimmed.length > 16 || trimmed.includes("<")) return fallback;
+  return trimmed;
+}
 
 // ---------- create team ----------
 router.post("/", async (req, res, next) => {
@@ -24,7 +36,7 @@ router.post("/", async (req, res, next) => {
     const { rows } = await client.query(
       `INSERT INTO teams (id, name, description, icon, purpose, owner_id)
        VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [teamId, name.trim(), (description || "").trim(), icon || "🚀", (purpose || "").trim(), req.user.id]
+      [teamId, name.trim(), (description || "").trim(), cleanIcon(icon, "🚀"), (purpose || "").trim(), req.user.id]
     );
     await client.query(
       `INSERT INTO team_members (id, team_id, user_id, role) VALUES ($1,$2,$3,'owner')`,
@@ -98,39 +110,6 @@ router.get("/:teamId/bundle", async (req, res, next) => {
     const pendingInvites = invitesRes.rows;
     const tasks = taskRows.rows.map(enrichTask);
 
-    const total = tasks.length;
-    const countBy = (s) => tasks.filter((t) => t.effectiveStatus === s).length;
-    const todo = countBy("todo");
-    const inProgress = countBy("in_progress");
-    const complete = countBy("complete");
-    const overdue = countBy("overdue");
-    const completionPct = total === 0 ? 0 : Math.round((complete / total) * 100);
-
-    const upcoming = tasks
-      .filter((t) => t.effectiveStatus !== "complete" && t.effectiveStatus !== "overdue")
-      .sort((a, b) => String(a.deadline || "").localeCompare(String(b.deadline || "")))
-      .slice(0, 5);
-
-    const overdueTasks = tasks
-      .filter((t) => t.effectiveStatus === "overdue")
-      .sort((a, b) => String(a.deadline || "").localeCompare(String(b.deadline || "")));
-
-    const memberProgress = members.map((m) => {
-      const mine = tasks.filter((t) => t.assigneeId === m.id);
-      const mineComplete = mine.filter((t) => t.effectiveStatus === "complete").length;
-      return {
-        id: m.id,
-        name: m.full_name,
-        role: m.role,
-        total: mine.length,
-        complete: mineComplete,
-        overdue: mine.filter((t) => t.effectiveStatus === "overdue").length,
-        inProgress: mine.filter((t) => t.effectiveStatus === "in_progress").length,
-        todo: mine.filter((t) => t.effectiveStatus === "todo").length,
-        completionPct: mine.length === 0 ? 0 : Math.round((mineComplete / mine.length) * 100),
-      };
-    });
-
     const recent = [...tasks]
       .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")))
       .slice(0, 6)
@@ -143,16 +122,7 @@ router.get("/:teamId/bundle", async (req, res, next) => {
       }));
 
     const dashboard = {
-      total,
-      todo,
-      inProgress,
-      complete,
-      overdue,
-      completionPct,
-      memberCount: members.length,
-      upcoming,
-      overdueTasks,
-      memberProgress,
+      ...computeDashboardStats(tasks, members),
       recentActivity: recent,
       generatedAt: new Date().toISOString(),
     };
@@ -278,7 +248,7 @@ router.put("/:teamId", requireTeamMember, requireTeamAdmin, async (req, res, nex
          icon = COALESCE(NULLIF($3,''), icon),
          purpose = COALESCE($4, purpose)
        WHERE id = $5 RETURNING *`,
-      [name?.trim(), description, icon?.trim(), purpose, req.params.teamId]
+      [name?.trim(), description, cleanIcon(icon, ""), purpose, req.params.teamId]
     );
     res.json(rows[0]);
   } catch (e) {

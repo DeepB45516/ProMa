@@ -3,6 +3,7 @@ const express = require("express");
 const { pool } = require("../db/pool");
 const { requireAuth, requireTeamMember } = require("../middleware/auth");
 const { enrichTask } = require("../lib/taskStatus");
+const { computeDashboardStats } = require("../lib/dashboardStats");
 
 const router = express.Router({ mergeParams: true });
 router.use(requireAuth, requireTeamMember);
@@ -33,50 +34,8 @@ router.get("/", async (req, res, next) => {
       [teamId]
     );
 
-    const total = tasks.length;
-    const countBy = (s) => tasks.filter((t) => t.effectiveStatus === s).length;
-    const todo = countBy("todo");
-    const inProgress = countBy("in_progress");
-    const complete = countBy("complete");
-    const overdue = countBy("overdue");
-    const completionPct = total === 0 ? 0 : Math.round((complete / total) * 100);
-
-    const upcoming = tasks
-      .filter((t) => t.effectiveStatus !== "complete" && t.effectiveStatus !== "overdue")
-      .sort((a, b) => String(a.deadline || "").localeCompare(String(b.deadline || "")))
-      .slice(0, 5);
-
-    const overdueTasks = tasks
-      .filter((t) => t.effectiveStatus === "overdue")
-      .sort((a, b) => String(a.deadline || "").localeCompare(String(b.deadline || "")));
-
-    const memberProgress = members.map((m) => {
-      const mine = tasks.filter((t) => t.assigneeId === m.id);
-      const mineComplete = mine.filter((t) => t.effectiveStatus === "complete").length;
-      return {
-        id: m.id,
-        name: m.full_name,
-        role: m.role,
-        total: mine.length,
-        complete: mineComplete,
-        overdue: mine.filter((t) => t.effectiveStatus === "overdue").length,
-        inProgress: mine.filter((t) => t.effectiveStatus === "in_progress").length,
-        todo: mine.filter((t) => t.effectiveStatus === "todo").length,
-        completionPct: mine.length === 0 ? 0 : Math.round((mineComplete / mine.length) * 100),
-      };
-    });
-
     res.json({
-      total,
-      todo,
-      inProgress,
-      complete,
-      overdue,
-      completionPct,
-      memberCount: members.length,
-      upcoming,
-      overdueTasks,
-      memberProgress,
+      ...computeDashboardStats(tasks, members),
       recentActivity: recent,
       generatedAt: new Date().toISOString(),
     });

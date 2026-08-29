@@ -155,7 +155,14 @@ a{ color: var(--accent); }
   height:100vh;
 }
 .brand{ display:flex; align-items:center; gap:10px; padding: 4px 8px 28px; }
-.brand-mark{ color: var(--accent); display:flex; }
+.brand-mark{ color: var(--accent); display:inline-flex; align-items:center; justify-content:center; }
+.brand-logo-img{
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
 .brand-name{ font-family: var(--font-display); font-weight:700; font-size:19px; }
 .brand-dot{ color: var(--accent); }
 

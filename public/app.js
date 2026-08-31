@@ -3590,11 +3590,6 @@ function openTaskModal(task = null) {
   if ($("#task-title")) $("#task-title").value = task ? task.title : "";
   if ($("#task-description")) $("#task-description").value = task ? task.description || "" : "";
 
-  const startEl = $("#task-start");
-  if (startEl) {
-    startEl.value = task ? toInputDateTime(task.startDate) : "";
-  }
-
   const deadlineEl = $("#task-deadline");
   if (deadlineEl) {
     deadlineEl.value = task ? toInputDateTime(task.deadline) : defaultEndTime;
@@ -3623,7 +3618,6 @@ async function handleTaskSubmit(e) {
     }
   }
 
-  const rawStart = $("#task-start").value;
   const rawDeadline = $("#task-deadline").value;
 
   if (!rawDeadline) {
@@ -3635,7 +3629,6 @@ async function handleTaskSubmit(e) {
     title: $("#task-title").value.trim(),
     description: $("#task-description").value.trim(),
     assigneeId: $("#task-assignee").value || null,
-    startDate: rawStart ? new Date(rawStart).toISOString() : null,
     deadline: new Date(rawDeadline).toISOString(),
     priority: $("#task-priority") ? $("#task-priority").value : "normal",
   };
@@ -3644,10 +3637,6 @@ async function handleTaskSubmit(e) {
   const now = new Date();
   if (!id && new Date(payload.deadline).getTime() < now.getTime() - 60000) {
     toast("Due date and time cannot be in the past.");
-    return;
-  }
-  if (!id && payload.startDate && new Date(payload.startDate).getTime() < now.getTime() - 60000) {
-    toast("Start date and time cannot be in the past.");
     return;
   }
 
@@ -4392,6 +4381,43 @@ function wireModals() {
   $("#task-modal-backdrop").addEventListener("click", (e) => { if (e.target.id === "task-modal-backdrop") closeTaskModal(); });
   $("#task-form").addEventListener("submit", handleTaskSubmit);
   $("#task-delete-btn").addEventListener("click", handleTaskDelete);
+
+  $("#btn-set-deadline")?.addEventListener("click", () => {
+    const dl = $("#task-deadline").value;
+    if (!dl) {
+      toast("Please select a due date & time first");
+      $("#task-deadline").focus();
+      return;
+    }
+    toast(`Due date & time confirmed: ${fmtDate(dl)}`);
+  });
+
+  $$("#deadline-quick-chips .chip-time-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const preset = btn.dataset.preset;
+      const now = new Date();
+      let targetDate = new Date();
+
+      if (preset === "eod") {
+        targetDate.setHours(18, 0, 0, 0);
+        if (targetDate.getTime() <= now.getTime()) {
+          targetDate = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+        }
+      } else if (preset === "tomorrow") {
+        targetDate.setDate(targetDate.getDate() + 1);
+        targetDate.setHours(18, 0, 0, 0);
+      } else if (preset === "in3days") {
+        targetDate.setDate(targetDate.getDate() + 3);
+        targetDate.setHours(18, 0, 0, 0);
+      } else if (preset === "in1week") {
+        targetDate.setDate(targetDate.getDate() + 7);
+        targetDate.setHours(18, 0, 0, 0);
+      }
+
+      $("#task-deadline").value = toInputDateTime(targetDate);
+      toast(`Due date set to ${fmtDate(targetDate)}`);
+    });
+  });
 
   // Activity Detail Modal Wiring
   $("#activity-detail-close")?.addEventListener("click", closeActivityDetailModal);

@@ -773,20 +773,19 @@
         <select id="task-assignee"></select>
       </label>
       <div class="field-row">
-        <label class="field">
+        <label class="field" style="margin-bottom:0;">
           <span>Due date &amp; time</span>
-          <input type="datetime-local" id="task-deadline" required />
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="datetime-local" id="task-deadline" required style="flex:1;" />
+            <button type="button" class="btn-set-time" id="btn-set-deadline" title="Confirm chosen due date &amp; time">Set</button>
+          </div>
+          <div class="quick-time-chips" id="deadline-quick-chips">
+            <button type="button" class="chip-time-btn" data-preset="eod">Today 6 PM</button>
+            <button type="button" class="chip-time-btn" data-preset="tomorrow">Tomorrow 6 PM</button>
+            <button type="button" class="chip-time-btn" data-preset="in3days">In 3 Days</button>
+            <button type="button" class="chip-time-btn" data-preset="in1week">In 1 Week</button>
+          </div>
         </label>
-        <label class="field" id="status-field">
-          <span>Status</span>
-          <select id="task-status">
-            <option value="todo" selected>To Do</option>
-            <option value="in_progress">In Progress</option>
-            <option value="complete">Complete</option>
-          </select>
-        </label>
-      </div>
-      <div class="field-row">
         <label class="field">
           <span>Priority</span>
           <select id="task-priority">
@@ -796,11 +795,15 @@
             <option value="urgent">● Urgent</option>
           </select>
         </label>
-        <label class="field">
-          <span>Start date &amp; time <em>(optional)</em></span>
-          <input type="datetime-local" id="task-start" />
-        </label>
       </div>
+      <label class="field" id="status-field">
+        <span>Status</span>
+        <select id="task-status">
+          <option value="todo" selected>To Do</option>
+          <option value="in_progress">In Progress</option>
+          <option value="complete">Complete</option>
+        </select>
+      </label>
       <label class="field">
         <span>Description <em>(optional)</em></span>
         <textarea id="task-description" rows="2" placeholder="What needs to happen for this activity?"></textarea>

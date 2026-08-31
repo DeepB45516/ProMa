@@ -77,16 +77,67 @@ function initials(name) {
 }
 function fmtDate(iso) {
   if (!iso) return "No date";
-  return new Date(iso + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    return String(iso).slice(0, 10);
+  }
+  const dateStr = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (typeof iso === "string" && (iso.includes("T") || iso.includes(":")) && iso.length > 10) {
+    const timeStr = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    return `${dateStr} at ${timeStr}`;
+  }
+  return dateStr;
 }
+
+function toInputDateTime(val, defaultTime = "18:00") {
+  if (!val) return "";
+  const d = new Date(val);
+  if (isNaN(d.getTime())) {
+    if (typeof val === "string" && val.length === 10) return `${val}T${defaultTime}`;
+    return "";
+  }
+  const Y = d.getFullYear();
+  const M = String(d.getMonth() + 1).padStart(2, "0");
+  const D = String(d.getDate()).padStart(2, "0");
+  const H = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${Y}-${M}-${D}T${H}:${min}`;
+}
+
 function deadlineMeta(task) {
   if (task.effectiveStatus === "complete") return "Completed";
   if (task.effectiveStatus === "overdue") {
-    const days = Math.abs(task.daysUntilDeadline);
+    if (task.deadline && (String(task.deadline).includes("T") || String(task.deadline).includes(":"))) {
+      const d = new Date(task.deadline);
+      if (!isNaN(d.getTime())) {
+        const timeStr = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        if (d.toDateString() === new Date().toDateString()) {
+          return `Overdue (was due today at ${timeStr})`;
+        }
+        return `Overdue (was due ${fmtDate(task.deadline)})`;
+      }
+    }
+    const days = Math.abs(task.daysUntilDeadline || 1);
     return `${days} day${days === 1 ? "" : "s"} overdue`;
   }
-  if (task.daysUntilDeadline === 0) return "Due today";
-  if (task.daysUntilDeadline === 1) return "Due tomorrow";
+  if (task.isDueToday || task.daysUntilDeadline === 0) {
+    if (task.deadline && (String(task.deadline).includes("T") || String(task.deadline).includes(":"))) {
+      const d = new Date(task.deadline);
+      if (!isNaN(d.getTime())) {
+        return `Due today at ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
+      }
+    }
+    return "Due today";
+  }
+  if (task.daysUntilDeadline === 1) {
+    if (task.deadline && (String(task.deadline).includes("T") || String(task.deadline).includes(":"))) {
+      const d = new Date(task.deadline);
+      if (!isNaN(d.getTime())) {
+        return `Due tomorrow at ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
+      }
+    }
+    return "Due tomorrow";
+  }
   return `Due ${fmtDate(task.deadline)}`;
 }
 
@@ -220,24 +271,47 @@ function wireAuthForms() {
     e.preventDefault();
     hideAuthBanner();
     const btn = $("#signup-submit");
-    btn.disabled = true;
-    btn.textContent = "Checking email…";
     const fullName = $("#signup-name").value.trim();
     const username = $("#signup-username").value.trim();
     const email = $("#signup-email").value.trim();
     const password = $("#signup-password").value;
 
-    try {
-      // Step 1: Email check
-      const checkRes = await api("/auth/check-email", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
+    if (!fullName || !username || !email || !password) {
+      showAuthBanner("Please fill in all required fields.");
+      return;
+    }
+    if (username.length < 3) {
+      showAuthBanner("Username must be at least 3 characters long.");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
+      showAuthBanner("Username can only contain letters, numbers, dots, underscores, and dashes.");
+      return;
+    }
+    if (password.length < 8) {
+      showAuthBanner("Password must be at least 8 characters.");
+      return;
+    }
 
-      if (checkRes.exists) {
+    btn.disabled = true;
+    btn.textContent = "Checking details…";
+
+    try {
+      // Step 1: Email and Username checks
+      const [emailCheck, userCheck] = await Promise.all([
+        api("/auth/check-email", { method: "POST", body: JSON.stringify({ email }) }),
+        api("/auth/check-username", { method: "POST", body: JSON.stringify({ username }) }),
+      ]);
+
+      if (emailCheck.exists) {
         showAuthBanner("An account with that email already exists. Please log in.");
         $("#login-identifier").value = email;
         showAuthPanel("login");
+        return;
+      }
+
+      if (!userCheck.available) {
+        showAuthBanner("This username is already taken. Please choose another username.");
         return;
       }
 
@@ -499,11 +573,26 @@ function updateProfileUI() {
   });
 }
 
-function computeClientEffectiveStatus(status, deadlineISO) {
+function computeClientEffectiveStatus(status, deadlineVal) {
   if (status === "complete") return "complete";
-  const today = new Date().toISOString().slice(0, 10);
-  if (deadlineISO && deadlineISO < today) return "overdue";
+  if (!deadlineVal) return status || "todo";
+  if (typeof deadlineVal === "string" && deadlineVal.length === 10 && !deadlineVal.includes("T")) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (deadlineVal < today) return "overdue";
+    return status || "todo";
+  }
+  const d = new Date(deadlineVal);
+  if (!isNaN(d.getTime()) && d.getTime() < Date.now()) {
+    return "overdue";
+  }
   return status || "todo";
+}
+
+function isTaskDueToday(task) {
+  if (!task || !task.deadline || task.effectiveStatus === "complete") return false;
+  const d = new Date(task.deadline);
+  if (isNaN(d.getTime())) return false;
+  return d.toDateString() === new Date().toDateString();
 }
 
 function canEditTask(task) {
@@ -521,12 +610,11 @@ function canEditTask(task) {
 
 function recomputeLocalDashboard() {
   if (!state.tasks || !state.members) return;
-  const today = new Date().toISOString().slice(0, 10);
 
   state.tasks.forEach((t) => {
     t.effectiveStatus = computeClientEffectiveStatus(t.status, t.deadline);
     t.isOverdue = t.effectiveStatus === "overdue";
-    t.isDueToday = t.deadline === today && t.effectiveStatus !== "complete";
+    t.isDueToday = isTaskDueToday(t);
   });
 
   const tasks = state.tasks;
@@ -976,8 +1064,9 @@ function setActiveNav() {
         });
       }
     }
+    const isManager = state.currentTeamRole === "owner" || state.currentTeamRole === "admin";
     if (mainCreateBtn) mainCreateBtn.hidden = true;
-    if (quickAddBtn) quickAddBtn.hidden = false;
+    if (quickAddBtn) quickAddBtn.hidden = !isManager;
     if (teamReportBtn) teamReportBtn.hidden = false;
     if (footerText) footerText.textContent = "Everyone on this team sees the same board.";
   }
@@ -1154,7 +1243,7 @@ function syncAssignedTasks() {
     state.tasks.forEach((t) => {
       t.effectiveStatus = computeClientEffectiveStatus(t.status, t.deadline);
       t.isOverdue = t.effectiveStatus === "overdue";
-      t.isDueToday = t.deadline === today && t.effectiveStatus !== "complete";
+      t.isDueToday = isTaskDueToday(t);
     });
   }
 
@@ -1199,7 +1288,7 @@ function syncAssignedTasks() {
     state.assignedTasks = state.assignedTasks.map((at) => {
       at.effectiveStatus = computeClientEffectiveStatus(at.status, at.deadline);
       at.isOverdue = at.effectiveStatus === "overdue";
-      at.isDueToday = at.deadline === today && at.effectiveStatus !== "complete";
+      at.isDueToday = isTaskDueToday(at);
       return withTeamMeta(at);
     });
   }
@@ -2264,7 +2353,7 @@ function renderTasks() {
         <option value="normal" ${state.taskPriorityFilter === "normal" ? "selected" : ""}>● Normal</option>
         <option value="low" ${state.taskPriorityFilter === "low" ? "selected" : ""}>● Low</option>
       </select>
-      <button class="btn btn-primary btn-sm" id="tasks-add-btn">+ Add activity</button>
+      ${state.currentTeamRole === "owner" || state.currentTeamRole === "admin" ? `<button class="btn btn-primary btn-sm" id="tasks-add-btn">+ Add activity</button>` : ""}
     </div>
   `;
   root.appendChild(toolbar);
@@ -2296,7 +2385,7 @@ function renderTasks() {
     state.taskPriorityFilter = e.target.value;
     renderTasksContent(container);
   });
-  $("#tasks-add-btn", toolbar).addEventListener("click", () => openTaskModal());
+  $("#tasks-add-btn", toolbar)?.addEventListener("click", () => openTaskModal());
 
   const container = document.createElement("div");
   container.id = "activities-container";
@@ -2340,12 +2429,13 @@ function renderTasksContent(container) {
   }
 
   if (state.tasks.length === 0) {
+    const isManager = state.currentTeamRole === "owner" || state.currentTeamRole === "admin";
     container.innerHTML = `
       <div class="panel" style="text-align:center; padding: 60px 20px;">
         <div style="margin-bottom:14px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></div>
         <h3 style="font-size:18px; margin-bottom:6px;">No activities yet</h3>
-        <p class="muted" style="margin-bottom:20px; font-size:14px;">Start by creating your team's first activity.</p>
-        <button class="btn btn-primary" id="empty-add-activity-btn">+ Add Activity</button>
+        <p class="muted" style="margin-bottom:20px; font-size:14px;">${isManager ? "Start by creating your team's first activity." : "No activities have been created for this team yet."}</p>
+        ${isManager ? `<button class="btn btn-primary" id="empty-add-activity-btn">+ Add Activity</button>` : ""}
       </div>`;
     $("#empty-add-activity-btn", container)?.addEventListener("click", () => openTaskModal());
     return;
@@ -2437,7 +2527,11 @@ function renderTasksContent(container) {
                       ? `<button class="btn btn-xs btn-primary mark-complete-quick-btn" data-task-id="${task.id}" title="Mark Complete">Done</button>`
                       : `<span style="color:#16924A;font-weight:700;font-size:12px;margin-right:4px;">Completed</span>`
                   }
-                  <button class="btn btn-xs btn-ghost btn-danger delete-quick-btn" data-task-id="${task.id}" title="Delete Activity" style="padding:3px 6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                  ${
+                    state.currentTeamRole === "owner" || state.currentTeamRole === "admin"
+                      ? `<button class="btn btn-xs btn-ghost btn-danger delete-quick-btn" data-task-id="${task.id}" title="Delete Activity" style="padding:3px 6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`
+                      : ""
+                  }
                 </div>`
               : `<span style="font-size:11.5px;color:var(--muted);font-weight:500;">Assigned to ${escapeHtml(task.assigneeName)}</span>`
           }
@@ -2773,7 +2867,7 @@ async function openActivityDetailModal(task) {
         </div>
       </div>
       <div>
-        <div class="detail-item-label">Due Date</div>
+        <div class="detail-item-label">Due Date &amp; Time</div>
         <div style="font-family:var(--font-mono);">${fmtDate(task.deadline)} ${task.effectiveStatus === "overdue" ? `<span style="color:#EF4444;font-weight:700;">(Overdue)</span>` : ""}</div>
       </div>
       <div>
@@ -3475,7 +3569,15 @@ function openTaskModal(task = null) {
     toast("Only the assigned member can edit this activity");
     return;
   }
-  const today = new Date().toISOString().slice(0, 10);
+  if (!task) {
+    const isManager = state.currentTeamRole === "owner" || state.currentTeamRole === "admin";
+    if (!isManager) {
+      toast("Only team admins and owners have permission to add activities.");
+      return;
+    }
+  }
+  const now = new Date();
+  const defaultEndTime = toInputDateTime(now, "18:00");
 
   const assigneeSel = $("#task-assignee");
   if (assigneeSel) {
@@ -3490,20 +3592,19 @@ function openTaskModal(task = null) {
 
   const startEl = $("#task-start");
   if (startEl) {
-    startEl.min = today;
-    startEl.value = task ? task.startDate || "" : today;
+    startEl.value = task ? toInputDateTime(task.startDate) : "";
   }
 
   const deadlineEl = $("#task-deadline");
   if (deadlineEl) {
-    deadlineEl.min = today;
-    deadlineEl.value = task ? task.deadline || "" : "";
+    deadlineEl.value = task ? toInputDateTime(task.deadline) : defaultEndTime;
   }
 
   if ($("#task-priority")) $("#task-priority").value = task ? (task.priority || "normal") : "normal";
   if ($("#task-status")) $("#task-status").value = task ? task.status : "todo";
   if ($("#status-field")) $("#status-field").hidden = !task;
-  if ($("#task-delete-btn")) $("#task-delete-btn").hidden = !task;
+  const isManager = state.currentTeamRole === "owner" || state.currentTeamRole === "admin";
+  if ($("#task-delete-btn")) $("#task-delete-btn").hidden = !task || !isManager;
   if ($("#task-save-btn")) $("#task-save-btn").textContent = task ? "Save changes" : "Save activity";
   if ($("#task-modal-backdrop")) $("#task-modal-backdrop").hidden = false;
   if ($("#task-title")) $("#task-title").focus();
@@ -3513,23 +3614,40 @@ function closeTaskModal() { $("#task-modal-backdrop").hidden = true; }
 async function handleTaskSubmit(e) {
   e.preventDefault();
   const id = $("#task-id").value;
+
+  if (!id) {
+    const isManager = state.currentTeamRole === "owner" || state.currentTeamRole === "admin";
+    if (!isManager) {
+      toast("Only team admins and owners have permission to add activities.");
+      return;
+    }
+  }
+
+  const rawStart = $("#task-start").value;
+  const rawDeadline = $("#task-deadline").value;
+
+  if (!rawDeadline) {
+    toast("Please select a due date and time.");
+    return;
+  }
+
   const payload = {
     title: $("#task-title").value.trim(),
     description: $("#task-description").value.trim(),
     assigneeId: $("#task-assignee").value || null,
-    startDate: $("#task-start").value || null,
-    deadline: $("#task-deadline").value,
+    startDate: rawStart ? new Date(rawStart).toISOString() : null,
+    deadline: new Date(rawDeadline).toISOString(),
     priority: $("#task-priority") ? $("#task-priority").value : "normal",
   };
   if (id) payload.status = $("#task-status").value;
 
-  const today = new Date().toISOString().slice(0, 10);
-  if (!id && payload.deadline < today) {
-    toast("Due date cannot be in the past.");
+  const now = new Date();
+  if (!id && new Date(payload.deadline).getTime() < now.getTime() - 60000) {
+    toast("Due date and time cannot be in the past.");
     return;
   }
-  if (!id && payload.startDate && payload.startDate < today) {
-    toast("Start date cannot be in the past.");
+  if (!id && payload.startDate && new Date(payload.startDate).getTime() < now.getTime() - 60000) {
+    toast("Start date and time cannot be in the past.");
     return;
   }
 
@@ -3538,11 +3656,6 @@ async function handleTaskSubmit(e) {
 
   try {
     if (id) {
-      // Optimistic edit — snapshot the original fields first so we can
-      // roll back cleanly if the server rejects the change (e.g. it fails
-      // validation, the task was deleted by someone else, or the request
-      // fails outright). Without this snapshot, a failed save would leave
-      // the UI silently showing edited values the server never accepted.
       const target = state.tasks.find((t) => t.id === id);
       const snapshot = target ? { ...target } : null;
       const assigneeObj = state.members.find((m) => m.id === payload.assigneeId);
@@ -3568,31 +3681,35 @@ async function handleTaskSubmit(e) {
         toast("Activity updated");
       } catch (saveErr) {
         // Roll back the optimistic edit so the UI reflects what's actually
-        // saved, then surface the real error.
+        // on the server instead of permanently showing rejected state.
         if (target && snapshot) {
           Object.assign(target, snapshot);
           syncAndPersistWorkspaceState();
           renderCurrentView();
         }
-        throw saveErr;
+        toast(saveErr.message || "Failed to update activity");
       }
     } else {
-      closeTaskModal();
-      toast("Adding activity...");
       const created = await api(`/teams/${state.currentTeamId}/tasks`, { method: "POST", body: JSON.stringify(payload) });
       state.tasks.unshift(created);
       syncAndPersistWorkspaceState();
       renderCurrentView();
+      closeTaskModal();
       toast("Activity added");
     }
   } catch (err) {
-    toast(err.message || "Failed to save activity");
+    toast(err.message);
   } finally {
     saveBtn.disabled = false;
   }
 }
 
 async function handleTaskDelete() {
+  const isManager = state.currentTeamRole === "owner" || state.currentTeamRole === "admin";
+  if (!isManager) {
+    toast("Only team admins and owners have permission to delete activities.");
+    return;
+  }
   const id = $("#task-id").value;
   if (!id) return;
   const task = state.tasks.find((t) => t.id === id);
@@ -3812,16 +3929,30 @@ function closeProfileModal() { $("#profile-modal-backdrop").hidden = true; }
 
 async function handleProfileSubmit(e) {
   e.preventDefault();
+  const username = $("#profile-username").value.trim();
+  if (!username) {
+    toast("Username is required.");
+    return;
+  }
+  if (username.length < 3) {
+    toast("Username must be at least 3 characters long.");
+    return;
+  }
+  if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
+    toast("Username can only contain letters, numbers, dots, underscores, and dashes.");
+    return;
+  }
+
   try {
     const { user } = await api("/users/me", {
       method: "PUT",
       body: JSON.stringify({
-        fullName: $("#profile-name").value,
-        username: $("#profile-username").value,
-        mobile: $("#profile-mobile").value,
-        designation: $("#profile-designation").value,
-        bio: $("#profile-bio").value,
-        avatarUrl: $("#profile-avatar-url").value,
+        fullName: $("#profile-name").value.trim(),
+        username,
+        mobile: $("#profile-mobile").value.trim(),
+        designation: $("#profile-designation").value.trim(),
+        bio: $("#profile-bio").value.trim(),
+        avatarUrl: $("#profile-avatar-url").value.trim(),
       }),
     });
     state.user = user;

@@ -175,5 +175,16 @@ CREATE INDEX IF NOT EXISTS idx_comments_task      ON task_comments(task_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_email_notif_status ON email_notifications(status, scheduled_for);
 CREATE INDEX IF NOT EXISTS idx_otp_email          ON otp_codes(email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_lower ON users(LOWER(username));
+
+-- Migrate task dates to timestamptz to support date and time
+DO $$
+BEGIN
+  ALTER TABLE tasks ALTER COLUMN deadline TYPE TIMESTAMPTZ USING deadline::TIMESTAMPTZ;
+  ALTER TABLE tasks ALTER COLUMN start_date TYPE TIMESTAMPTZ USING start_date::TIMESTAMPTZ;
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
+
 
 

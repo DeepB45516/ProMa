@@ -429,6 +429,7 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
               to: targetUser.email,
               teamName,
               invitedBy: req.user.full_name,
+              invitedByUsername: req.user.username,
               inviteUrl,
             }),
         }).catch(() => {});
@@ -440,7 +441,7 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
         teamId: req.params.teamId,
         type: "team_invite",
         title: "Team Invitation",
-        message: `${req.user.full_name} invited you to join team "${teamName}".`,
+        message: `${req.user.full_name} (@${req.user.username}) invited you to join team "${teamName}".`,
         link: "/main",
       });
 
@@ -480,6 +481,7 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
       to: clean,
       teamName,
       invitedBy: req.user.full_name,
+      invitedByUsername: req.user.username,
       inviteUrl,
     }).catch((err) => console.error("[email] Team invite send failed:", err.message));
 
@@ -498,15 +500,17 @@ router.post("/:teamId/members", requireTeamMember, requireTeamAdmin, async (req,
 router.put("/:teamId/members/:userId", requireTeamMember, requireTeamAdmin, async (req, res, next) => {
   try {
     const { role } = req.body;
-    if (!["admin", "member"].includes(role)) return res.status(400).json({ error: "Role must be admin or member." });
-
+    if (!["admin", "member"].includes(role)) {
+      return res.status(400).json({ error: "Role must be 'admin' or 'member'." });
+    }
     const target = await pool.query(
       `SELECT role FROM team_members WHERE team_id = $1 AND user_id = $2`,
       [req.params.teamId, req.params.userId]
     );
-    if (!target.rows[0]) return res.status(404).json({ error: "That person isn't on this team." });
-    if (target.rows[0].role === "owner") return res.status(403).json({ error: "The team owner's role can't be changed." });
-
+    if (!target.rows[0]) return res.status(404).json({ error: "Member not found." });
+    if (target.rows[0].role === "owner") {
+      return res.status(400).json({ error: "Cannot change the team owner's role." });
+    }
     await pool.query(
       `UPDATE team_members SET role = $1 WHERE team_id = $2 AND user_id = $3`,
       [role, req.params.teamId, req.params.userId]
@@ -519,13 +523,17 @@ router.put("/:teamId/members/:userId", requireTeamMember, requireTeamAdmin, asyn
 
 router.delete("/:teamId/members/:userId", requireTeamMember, requireTeamAdmin, async (req, res, next) => {
   try {
+    if (req.params.userId === req.user.id) {
+      return res.status(400).json({ error: "You cannot remove yourself. Leave the team instead." });
+    }
     const target = await pool.query(
       `SELECT role FROM team_members WHERE team_id = $1 AND user_id = $2`,
       [req.params.teamId, req.params.userId]
     );
-    if (!target.rows[0]) return res.status(404).json({ error: "That person isn't on this team." });
-    if (target.rows[0].role === "owner") return res.status(403).json({ error: "The team owner can't be removed." });
-
+    if (!target.rows[0]) return res.status(404).json({ error: "Member not found." });
+    if (target.rows[0].role === "owner") {
+      return res.status(400).json({ error: "Cannot remove the team owner." });
+    }
     await pool.query(`DELETE FROM team_members WHERE team_id = $1 AND user_id = $2`, [req.params.teamId, req.params.userId]);
     await pool.query(
       `UPDATE tasks SET assignee_id = NULL WHERE team_id = $1 AND assignee_id = $2`,
@@ -552,6 +560,7 @@ router.post("/:teamId/invites/:inviteId/resend", requireTeamMember, requireTeamA
       to: invite.email,
       teamName: invite.team_name,
       invitedBy: req.user.full_name,
+      invitedByUsername: req.user.username,
       inviteUrl,
     }).catch((err) => console.error("[email] Team invite resend failed:", err.message));
 

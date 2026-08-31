@@ -488,11 +488,12 @@
             </div>
           </label>
           <label class="field">
-            <span>Username <em>(optional)</em></span>
+            <span>Username</span>
             <div class="input-icon-wrap">
               <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
-              <input type="text" id="signup-username" autocomplete="username" placeholder="alexm" />
+              <input type="text" id="signup-username" autocomplete="username" placeholder="alexm" required minlength="3" />
             </div>
+            <span class="hint">Unique username (minimum 3 characters).</span>
           </label>
           <label class="field">
             <span>Email address</span>
@@ -773,8 +774,8 @@
       </label>
       <div class="field-row">
         <label class="field">
-          <span>Due date</span>
-          <input type="date" id="task-deadline" required />
+          <span>Due date &amp; time</span>
+          <input type="datetime-local" id="task-deadline" required />
         </label>
         <label class="field" id="status-field">
           <span>Status</span>
@@ -796,8 +797,8 @@
           </select>
         </label>
         <label class="field">
-          <span>Start date <em>(optional)</em></span>
-          <input type="date" id="task-start" />
+          <span>Start date &amp; time <em>(optional)</em></span>
+          <input type="datetime-local" id="task-start" />
         </label>
       </div>
       <label class="field">

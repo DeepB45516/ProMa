@@ -29,6 +29,27 @@ router.post("/check-email", async (req, res, next) => {
   }
 });
 
+// ---------- username check ----------
+router.post("/check-username", async (req, res, next) => {
+  try {
+    const { username } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ error: "Username is required." });
+    }
+    const clean = username.trim().toLowerCase();
+    if (clean.length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters long." });
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(clean)) {
+      return res.status(400).json({ error: "Username can only contain letters, numbers, dots, underscores, and dashes." });
+    }
+    const { rows } = await pool.query(`SELECT 1 FROM users WHERE LOWER(username) = $1`, [clean]);
+    res.json({ exists: Boolean(rows[0]), available: !rows[0], username: clean });
+  } catch (e) {
+    next(e);
+  }
+});
+
 // ---------- email OTP send & verify ----------
 router.post("/otp/email/send", rateLimit("otp-email-send", 5, 15 * 60 * 1000), async (req, res, next) => {
   try {
@@ -88,6 +109,16 @@ router.post("/otp/email/verify", rateLimit("otp-email-verify", 10, 15 * 60 * 100
     if (!fullName?.trim() || !password || password.length < 8) {
       return res.status(400).json({ error: "Full name and password (at least 8 characters) are required." });
     }
+    if (!username?.trim()) {
+      return res.status(400).json({ error: "Username is required." });
+    }
+    const cleanUsername = username.trim().toLowerCase();
+    if (cleanUsername.length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters long." });
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(cleanUsername)) {
+      return res.status(400).json({ error: "Username can only contain letters, numbers, dots, underscores, and dashes." });
+    }
     const cleanEmail = email.trim().toLowerCase();
     const codeHash = crypto.createHash("sha256").update(code.trim()).digest("hex");
 
@@ -116,16 +147,17 @@ router.post("/otp/email/verify", rateLimit("otp-email-verify", 10, 15 * 60 * 100
       return res.status(409).json({ error: "An account with that email already exists." });
     }
 
-    const cleanUsername = (username?.trim() || usernameFromEmail(cleanEmail)).toLowerCase();
-    const usernameTaken = await pool.query(`SELECT 1 FROM users WHERE username = $1`, [cleanUsername]);
-    const finalUsername = usernameTaken.rows[0] ? await uniqueUsername(cleanUsername) : cleanUsername;
+    const usernameTaken = await pool.query(`SELECT 1 FROM users WHERE LOWER(username) = $1`, [cleanUsername]);
+    if (usernameTaken.rows[0]) {
+      return res.status(409).json({ error: "This username is already taken. Please choose another username." });
+    }
 
     const hash = await bcrypt.hash(password, 10);
     const id = genId();
     const { rows: createdRows } = await pool.query(
       `INSERT INTO users (id, full_name, username, email, password_hash)
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [id, fullName.trim(), finalUsername, cleanEmail, hash]
+      [id, fullName.trim(), cleanUsername, cleanEmail, hash]
     );
 
     await attachPendingInvites(id, cleanEmail);
@@ -184,27 +216,35 @@ async function uniqueUsername(base) {
 router.post("/signup", rateLimit("signup", 10, 15 * 60 * 1000), async (req, res, next) => {
   try {
     const { fullName, username, email, password } = req.body;
-    if (!fullName?.trim() || !email?.trim() || !password) {
-      return res.status(400).json({ error: "Name, email, and password are required." });
+    if (!fullName?.trim() || !username?.trim() || !email?.trim() || !password) {
+      return res.status(400).json({ error: "Full name, username, email, and password are all required." });
+    }
+    const cleanUsername = username.trim().toLowerCase();
+    if (cleanUsername.length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters long." });
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(cleanUsername)) {
+      return res.status(400).json({ error: "Username can only contain letters, numbers, dots, underscores, and dashes." });
     }
     if (password.length < 8) {
       return res.status(400).json({ error: "Password must be at least 8 characters." });
     }
     const cleanEmail = email.trim().toLowerCase();
-    const cleanUsername = (username?.trim() || usernameFromEmail(cleanEmail)).toLowerCase();
 
     const existing = await pool.query(`SELECT 1 FROM users WHERE email = $1`, [cleanEmail]);
     if (existing.rows[0]) return res.status(409).json({ error: "An account with that email already exists." });
 
-    const usernameTaken = await pool.query(`SELECT 1 FROM users WHERE username = $1`, [cleanUsername]);
-    const finalUsername = usernameTaken.rows[0] ? await uniqueUsername(cleanUsername) : cleanUsername;
+    const usernameTaken = await pool.query(`SELECT 1 FROM users WHERE LOWER(username) = $1`, [cleanUsername]);
+    if (usernameTaken.rows[0]) {
+      return res.status(409).json({ error: "This username is already taken. Please choose another username." });
+    }
 
     const hash = await bcrypt.hash(password, 10);
     const id = genId();
     const { rows } = await pool.query(
       `INSERT INTO users (id, full_name, username, email, password_hash)
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [id, fullName.trim(), finalUsername, cleanEmail, hash]
+      [id, fullName.trim(), cleanUsername, cleanEmail, hash]
     );
 
     await attachPendingInvites(id, cleanEmail);

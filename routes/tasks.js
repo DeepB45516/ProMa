@@ -30,6 +30,10 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   try {
+    if (req.teamRole !== "owner" && req.teamRole !== "admin") {
+      return res.status(403).json({ error: "Only team admins and owners have permission to add activities." });
+    }
+
     const { title, description, assigneeId, startDate, deadline, priority, checklist } = req.body;
     if (!title?.trim()) return res.status(400).json({ error: "Activity name is required." });
     if (!deadline) return res.status(400).json({ error: "Deadline is required." });
@@ -82,7 +86,7 @@ router.post("/", async (req, res, next) => {
         activityId: id,
         type: "task_assigned",
         title: "New Activity Assigned",
-        message: `${req.user.full_name} assigned you: "${title.trim()}".`,
+        message: `${req.user.full_name} (@${req.user.username}) assigned you: "${title.trim()}".`,
         link: `/teams/${req.params.teamId}/tasks`,
       });
 
@@ -103,6 +107,7 @@ router.post("/", async (req, res, next) => {
               taskDescription: (description || "").trim(),
               teamName,
               assignedBy: req.user.full_name,
+              assignedByUsername: req.user.username,
               dueDate: deadline,
               status: "To Do",
               taskUrl: `${process.env.APP_URL || "http://localhost:3000"}/teams/${req.params.teamId}/tasks`,
@@ -194,7 +199,7 @@ router.put("/:taskId", async (req, res, next) => {
         activityId: req.params.taskId,
         type: "task_reassigned",
         title: "Activity Reassigned to You",
-        message: `${req.user.full_name} assigned activity "${updatedTask.title}" to you.`,
+        message: `${req.user.full_name} (@${req.user.username}) assigned activity "${updatedTask.title}" to you.`,
         link: `/teams/${req.params.teamId}/tasks`,
       });
 
@@ -211,6 +216,7 @@ router.put("/:taskId", async (req, res, next) => {
               taskDescription: updatedTask.description,
               teamName,
               assignedBy: req.user.full_name,
+              assignedByUsername: req.user.username,
               dueDate: updatedTask.deadline ? String(updatedTask.deadline).slice(0, 10) : "No deadline",
               status: updatedTask.status,
               taskUrl: `${process.env.APP_URL || "http://localhost:3000"}/teams/${req.params.teamId}/tasks`,
@@ -334,21 +340,15 @@ router.delete("/:taskId", async (req, res, next) => {
   try {
     const { taskId, teamId } = req.params;
 
+    if (req.teamRole !== "owner" && req.teamRole !== "admin") {
+      return res.status(403).json({ error: "Only team admins and owners have permission to delete activities." });
+    }
+
     await client.query("BEGIN");
-    const existing = await client.query(`SELECT id, assignee_id, created_by FROM tasks WHERE id = $1 AND team_id = $2`, [taskId, teamId]);
+    const existing = await client.query(`SELECT id FROM tasks WHERE id = $1 AND team_id = $2`, [taskId, teamId]);
     if (!existing.rows[0]) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Activity not found." });
-    }
-
-    const taskRow = existing.rows[0];
-    const isAssignee = taskRow.assignee_id && taskRow.assignee_id === req.user.id;
-    const isCreator = taskRow.created_by && taskRow.created_by === req.user.id;
-    const isManager = ["owner", "admin"].includes(req.teamRole);
-
-    if (!isAssignee && !isCreator && !isManager) {
-      await client.query("ROLLBACK");
-      return res.status(403).json({ error: "Only the assigned member, creator, or team admin can delete this activity." });
     }
 
     await client.query(`DELETE FROM task_comments WHERE task_id = $1`, [taskId]);

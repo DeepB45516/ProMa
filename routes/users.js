@@ -38,10 +38,19 @@ router.put("/me", async (req, res, next) => {
     if (avatarUrl !== undefined) { fields.push(`avatar_url = $${i++}`); values.push(avatarUrl.trim() || null); }
     if (mobile !== undefined) { fields.push(`mobile = $${i++}`); values.push(mobile.trim() || null); }
 
-    if (username !== undefined && username.trim()) {
+    if (username !== undefined) {
+      if (!username || !username.trim()) {
+        return res.status(400).json({ error: "Username is required and cannot be empty." });
+      }
       const clean = username.trim().toLowerCase();
-      const taken = await pool.query(`SELECT 1 FROM users WHERE username = $1 AND id <> $2`, [clean, req.user.id]);
-      if (taken.rows[0]) return res.status(409).json({ error: "That username is already taken." });
+      if (clean.length < 3) {
+        return res.status(400).json({ error: "Username must be at least 3 characters long." });
+      }
+      if (!/^[a-zA-Z0-9_.-]+$/.test(clean)) {
+        return res.status(400).json({ error: "Username can only contain letters, numbers, dots, underscores, and dashes." });
+      }
+      const taken = await pool.query(`SELECT 1 FROM users WHERE LOWER(username) = $1 AND id <> $2`, [clean, req.user.id]);
+      if (taken.rows[0]) return res.status(409).json({ error: "That username is already taken. Please choose another username." });
       fields.push(`username = $${i++}`);
       values.push(clean);
     }

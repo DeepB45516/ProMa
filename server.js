@@ -1,6 +1,11 @@
 // server.js — ProMa: startup project manager with auth + multi-team support
 require("dotenv").config();
 
+const dns = require("dns");
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder("ipv4first");
+}
+
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");

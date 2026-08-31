@@ -79,22 +79,20 @@ router.post("/", async (req, res, next) => {
     const teamName = teamRows[0]?.name || "Team";
 
     // Send assignment notification & email
-    if (assigneeId && assigneeId !== req.user.id) {
-      await createNotification({
-        userId: assigneeId,
-        teamId: req.params.teamId,
-        activityId: id,
-        type: "task_assigned",
-        title: "New Activity Assigned",
-        message: `${req.user.full_name} (@${req.user.username}) assigned you: "${title.trim()}".`,
-        link: `/teams/${req.params.teamId}/tasks`,
-      });
+    if (assigneeId) {
+      if (assigneeId !== req.user.id) {
+        await createNotification({
+          userId: assigneeId,
+          teamId: req.params.teamId,
+          activityId: id,
+          type: "task_assigned",
+          title: "New Activity Assigned",
+          message: `${req.user.full_name} (@${req.user.username}) assigned you: "${title.trim()}".`,
+          link: `/teams/${req.params.teamId}/tasks`,
+        });
+      }
 
-      if (assignee && assignee.notif_email !== false && assignee.notif_assignment !== false) {
-        // Task is already saved and the in-app notification already
-        // created above — the email is dispatched in the background so the
-        // browser doesn't wait on the mail provider before showing the
-        // task as assigned.
+      if (assignee && assignee.email && assignee.notif_email !== false && assignee.notif_assignment !== false) {
         dispatchTrackedEmail({
           userId: assigneeId,
           activityId: id,
@@ -112,7 +110,7 @@ router.post("/", async (req, res, next) => {
               status: "To Do",
               taskUrl: `${process.env.APP_URL || "http://localhost:3000"}/teams/${req.params.teamId}/tasks`,
             }),
-        }).catch(() => {});
+        }).catch((err) => console.error("[email] Assignment dispatch failed:", err.message));
       }
     }
 
@@ -192,18 +190,20 @@ router.put("/:taskId", async (req, res, next) => {
     // Detect reassignment or new assignment
     const isReassigned = assigneeId !== undefined && assigneeId !== existingTask.assignee_id && assigneeId !== null;
 
-    if (isReassigned && assigneeId !== req.user.id) {
-      await createNotification({
-        userId: assigneeId,
-        teamId: req.params.teamId,
-        activityId: req.params.taskId,
-        type: "task_reassigned",
-        title: "Activity Reassigned to You",
-        message: `${req.user.full_name} (@${req.user.username}) assigned activity "${updatedTask.title}" to you.`,
-        link: `/teams/${req.params.teamId}/tasks`,
-      });
+    if (isReassigned) {
+      if (assigneeId !== req.user.id) {
+        await createNotification({
+          userId: assigneeId,
+          teamId: req.params.teamId,
+          activityId: req.params.taskId,
+          type: "task_reassigned",
+          title: "Activity Reassigned to You",
+          message: `${req.user.full_name} (@${req.user.username}) assigned activity "${updatedTask.title}" to you.`,
+          link: `/teams/${req.params.teamId}/tasks`,
+        });
+      }
 
-      if (assignee && assignee.notif_email !== false && assignee.notif_assignment !== false) {
+      if (assignee && assignee.email && assignee.notif_email !== false && assignee.notif_assignment !== false) {
         dispatchTrackedEmail({
           userId: assigneeId,
           activityId: req.params.taskId,
@@ -221,7 +221,7 @@ router.put("/:taskId", async (req, res, next) => {
               status: updatedTask.status,
               taskUrl: `${process.env.APP_URL || "http://localhost:3000"}/teams/${req.params.teamId}/tasks`,
             }),
-        }).catch(() => {});
+        }).catch((err) => console.error("[email] Reassignment dispatch failed:", err.message));
       }
     }
 

@@ -21,15 +21,17 @@ services:
         sync: false   # set this to your live Render URL (e.g. https://your-app.onrender.com) once you know it.
                        # Without this, links inside task-assignment, team-invite, and password-reset
                        # emails will point at http://localhost:3000 and won't work for real users.
-      # Optional — only needed if you want real emails delivered instead of
-      # just logged to the server console. Set ONE of these two groups:
-      #   Resend:  RESEND_API_KEY
-      #   Gmail/SMTP: SMTP_USER, SMTP_PASS, SMTP_HOST, SMTP_PORT
+      # Optional — needed for real deployed emails. On Render's free plan,
+      # use an HTTPS API provider because outbound SMTP ports are blocked:
+      #   Preferred: BREVO_API_KEY or RESEND_API_KEY
+      #   Local/paid-host SMTP: SMTP_USER, SMTP_PASS, SMTP_HOST, SMTP_PORT
       #   Optional for all providers: SENDER_EMAIL
       - key: RESEND_API_KEY
         sync: false
       - key: BREVO_API_KEY
         sync: false
+      - key: ALLOW_SMTP_ON_RENDER
+        value: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

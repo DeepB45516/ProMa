@@ -80,18 +80,28 @@ router.post("/otp/email/send", rateLimit("otp-email-send", 5, 15 * 60 * 1000), a
     const codeHash = crypto.createHash("sha256").update(code).digest("hex");
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
+    const otpId = genId();
     await pool.query(
       `INSERT INTO otp_codes (id, mobile, email, code, code_hash, expires_at)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [genId(), `email:${cleanEmail}`, cleanEmail, "******", codeHash, expiresAt]
+      [otpId, `email:${cleanEmail}`, cleanEmail, "******", codeHash, expiresAt]
     );
 
     const result = await sendVerificationOtpEmail(cleanEmail, code);
-    if (!result.ok && !result.devMode) {
-      return res.status(500).json({ error: "Failed to deliver verification email. Please try again." });
+    if (!result.ok || (!isDev && result.devMode)) {
+      await pool.query(`DELETE FROM otp_codes WHERE id = $1`, [otpId]).catch((err) => {
+        console.warn("[otp] Failed to clean up undelivered email OTP:", err.message);
+      });
+      return res.status(502).json({ error: "We couldn't send the verification email right now. Please try again in a few minutes." });
     }
 
-    res.json({ ok: true, message: "Verification code sent to your email." });
+    const response = { ok: true, message: "Verification code sent to your email." };
+    if (isDev && result.devMode) {
+      response.code = code;
+      response.devNote = "No email provider delivered the message, so the code is included here for local testing only.";
+    }
+
+    res.json(response);
   } catch (e) {
     next(e);
   }

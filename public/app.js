@@ -317,13 +317,15 @@ function wireAuthForms() {
 
       // Step 2: Send OTP
       btn.textContent = "Sending verification code…";
-      await api("/auth/otp/email/send", {
+      const otpResult = await api("/auth/otp/email/send", {
         method: "POST",
         body: JSON.stringify({ email }),
       });
 
       state.pendingSignup = { fullName, username, email, password };
-      $("#email-otp-sent-to").textContent = `We sent a 6-digit verification code to ${email}.`;
+      $("#email-otp-sent-to").textContent = otpResult.code
+        ? `Local testing code for ${email}: ${otpResult.code}`
+        : `We sent a 6-digit verification code to ${email}.`;
       $("#email-otp-code").value = "";
       showAuthPanel("email-otp");
       startEmailOtpCooldown(60);
@@ -381,11 +383,17 @@ function wireAuthForms() {
       const draft = state.pendingSignup || { email: $("#signup-email").value };
       if (!draft.email) return;
       try {
-        await api("/auth/otp/email/send", {
+        const otpResult = await api("/auth/otp/email/send", {
           method: "POST",
           body: JSON.stringify({ email: draft.email }),
         });
-        showAuthBanner("Verification code resent to your email!", "success");
+        if (otpResult.code) {
+          $("#email-otp-sent-to").textContent = `Local testing code for ${draft.email}: ${otpResult.code}`;
+          showAuthBanner("Verification code regenerated for local testing.", "success");
+        } else {
+          $("#email-otp-sent-to").textContent = `We sent a 6-digit verification code to ${draft.email}.`;
+          showAuthBanner("Verification code resent to your email!", "success");
+        }
         startEmailOtpCooldown(60);
       } catch (err) {
         showAuthBanner(err.message);

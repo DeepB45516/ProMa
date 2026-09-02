@@ -24,8 +24,15 @@ services:
       # Optional — only needed if you want real emails delivered instead of
       # just logged to the server console. Set ONE of these two groups:
       #   Resend:  RESEND_API_KEY
-      #   Gmail/SMTP: SMTP_USER, SMTP_PASS (and optionally SMTP_HOST/SMTP_PORT/SENDER_EMAIL)
+      #   Gmail/SMTP: SMTP_USER, SMTP_PASS, SMTP_HOST, SMTP_PORT
+      #   Optional for all providers: SENDER_EMAIL
       - key: RESEND_API_KEY
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
         sync: false
       - key: SMTP_USER
         sync: false

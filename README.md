@@ -69,14 +69,14 @@ This repository uses separate project roots:
 
 | Platform | Root Directory | Production environment variables |
 |---|---|---|
-| Vercel (frontend) | `public` | `API_BASE_URL=https://<your-render-service>.onrender.com` |
+| Vercel (frontend) | `public` | None required |
 | Render (API) | `.` | `APP_URL=https://<your-vercel-project>.vercel.app`, `FRONTEND_URL=https://<your-vercel-project>.vercel.app` |
 
-Vercel reads [`public/vercel.json`](public/vercel.json) (Vercel uses JSON configuration, not `vercel.yml`) and builds a small `config.js` file containing the public Render API URL. Set `API_BASE_URL` for Production, Preview, and Development in Vercel before deploying. It is public by design; do not put API keys or secrets in it.
+Vercel reads [`public/vercel.json`](public/vercel.json) (Vercel uses JSON configuration, not `vercel.yml`) and proxies browser `/api` requests to the Render service. This keeps session cookies on the Vercel domain instead of relying on cross-site cookies between `vercel.app` and `onrender.com`.
 
-On Render, use `render.yaml` with Root Directory set to the repository root. Keep `COOKIE_SAME_SITE=none` and the default production secure-cookie behavior: they are required for Vercel to make credentialed requests to Render. Add any Vercel preview URLs to `FRONTEND_URL` as a comma-separated list when preview deployments need to call the API.
+On Render, use `render.yaml` with Root Directory set to the repository root. Set `COOKIE_SAME_SITE=lax` and keep the default production secure-cookie behavior. Add any Vercel preview URLs to `FRONTEND_URL` as a comma-separated list when preview deployments need to call the API.
 
-For Google sign-in, register `https://<your-render-service>.onrender.com/api/auth/google/callback` as the authorized redirect URI. The callback authenticates on Render and then returns users to `APP_URL` on Vercel.
+For Google sign-in, register `https://<your-vercel-project>.vercel.app/api/auth/google/callback` as the authorized redirect URI. Set that same URL as `GOOGLE_CALLBACK_URL` in Render. Vercel proxies the callback to Render, which authenticates the user and returns them to `APP_URL`.
 
 ## Deploy API on Render
 
@@ -103,7 +103,7 @@ In the Render dashboard, under the new service → **Environment**, set:
 | `PGPOOL_MAX` | Optional. Database connections per app process; defaults to `5`, suitable for low-limit hosted session pools. |
 | `APP_URL` | Your live Vercel frontend URL. Used by emails and OAuth redirects. |
 | `FRONTEND_URL` | Your live Vercel frontend URL. Allowed browser origin for API requests. |
-| `COOKIE_SAME_SITE` | `none` for a separate Vercel frontend; use `lax` only when frontend and API share an origin. |
+| `COOKIE_SAME_SITE` | `lax` for the Vercel API proxy. |
 
 `JWT_SECRET` signs login session cookies — keep it private and don't reuse it elsewhere.
 

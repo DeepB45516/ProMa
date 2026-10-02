@@ -8,6 +8,15 @@ const TOKEN_TTL = "30d";
 const USE_SECURE_COOKIES =
   process.env.COOKIE_SECURE === "true" ||
   (process.env.COOKIE_SECURE !== "false" && process.env.NODE_ENV === "production");
+const COOKIE_SAME_SITE = process.env.COOKIE_SAME_SITE === "none" ? "none" : "lax";
+
+function authCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: COOKIE_SAME_SITE,
+    secure: USE_SECURE_COOKIES,
+  };
+}
 
 function signToken(userId) {
   return jwt.sign({ uid: userId }, JWT_SECRET, { expiresIn: TOKEN_TTL });
@@ -16,15 +25,13 @@ function signToken(userId) {
 function setAuthCookie(res, userId) {
   const token = signToken(userId);
   res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: USE_SECURE_COOKIES,
+    ...authCookieOptions(),
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 }
 
 function clearAuthCookie(res) {
-  res.clearCookie(COOKIE_NAME);
+  res.clearCookie(COOKIE_NAME, authCookieOptions());
 }
 
 // In-memory cache for fast user session lookups (avoids repeated DB roundtrips)

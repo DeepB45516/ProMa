@@ -25,12 +25,19 @@ const state = {
 let emailOtpTimer = null;
 
 // ---------- API ----------
+const API_BASE_URL = typeof window.PROMA_API_URL === "string" ? window.PROMA_API_URL.replace(/\/$/, "") : "";
+
+function apiUrl(path) {
+  const apiPath = path.startsWith("/api") ? path : `/api${path}`;
+  return `${API_BASE_URL}${apiPath}`;
+}
+
 async function api(path, opts = {}) {
   let res;
   try {
-    res = await fetch(path.startsWith("/api") ? path : `/api${path}`, {
+    res = await fetch(apiUrl(path), {
       headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
+      credentials: API_BASE_URL ? "include" : "same-origin",
       ...opts,
     });
   } catch (netErr) {
@@ -186,7 +193,7 @@ async function handleGoogleClick() {
       showAuthBanner("Google sign-in isn't set up on this server yet — add GOOGLE_CLIENT_ID/SECRET to enable it.");
       return;
     }
-    window.location.href = "/api/auth/google";
+    window.location.href = apiUrl("/auth/google");
   } catch (e) {
     showAuthBanner("Couldn't reach the server. Try again.");
   }

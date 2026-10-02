@@ -22,6 +22,10 @@ const { getHealthStatus, startUptimeHeartbeat } = require("./lib/uptimeRobot");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const frontendOrigins = (process.env.FRONTEND_URL || process.env.APP_URL || "")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 
 // Render (and most hosts) sit behind a reverse proxy — trust the first hop so
 // req.secure / req.ip and the "secure" cookie flag behave correctly.
@@ -31,7 +35,18 @@ app.set("trust proxy", 1);
 // loads, especially on slower mobile connections.
 app.use(compression());
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Requests without an Origin header are server-to-server, health-check,
+      // or local navigation requests. Browser requests must be explicitly allowed.
+      if (!origin || process.env.NODE_ENV !== "production") return callback(null, true);
+      if (frontendOrigins.includes(origin.replace(/\/$/, ""))) return callback(null, true);
+      return callback(new Error("Origin is not allowed by CORS."));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(

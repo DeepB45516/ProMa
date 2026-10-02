@@ -140,6 +140,7 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL; // e.g. https://yourapp.onrender.com/api/auth/google/callback
 const GOOGLE_CONFIGURED = Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_CALLBACK_URL);
+const APP_URL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -422,7 +423,7 @@ router.get("/google/callback", async (req, res, next) => {
   try {
     if (!GOOGLE_CONFIGURED) return res.status(503).send("Google sign-in isn't configured on this server yet.");
     const { code } = req.query;
-    if (!code) return res.redirect("/?authError=Google sign-in was cancelled.");
+    if (!code) return res.redirect(`${APP_URL}/?authError=${encodeURIComponent("Google sign-in was cancelled.")}`);
 
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -436,7 +437,7 @@ router.get("/google/callback", async (req, res, next) => {
       }),
     });
     const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) return res.redirect("/?authError=Google sign-in failed.");
+    if (!tokenData.access_token) return res.redirect(`${APP_URL}/?authError=${encodeURIComponent("Google sign-in failed.")}`);
 
     const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -468,7 +469,7 @@ router.get("/google/callback", async (req, res, next) => {
     }
 
     setAuthCookie(res, user.id);
-    res.redirect("/");
+    res.redirect(APP_URL);
   } catch (e) {
     next(e);
   }

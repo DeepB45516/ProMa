@@ -2,6 +2,7 @@ services:
   - type: web
     name: startup-project-manager
     runtime: node
+    rootDir: .
     plan: free
     buildCommand: npm install
     startCommand: npm start
@@ -20,9 +21,13 @@ services:
       - key: CRON_SECRET
         generateValue: true   # required in production to call POST /api/internal/process-reminders (send as the X-Cron-Secret header)
       - key: APP_URL
-        sync: false   # set this to your live Render URL (e.g. https://your-app.onrender.com) once you know it.
+        sync: false   # set this to your live Vercel URL (e.g. https://your-app.vercel.app).
                        # Without this, links inside task-assignment, team-invite, and password-reset
                        # emails will point at http://localhost:3000 and won't work for real users.
+      - key: FRONTEND_URL
+        sync: false   # same Vercel URL as APP_URL; comma-separate additional allowed frontend origins.
+      - key: COOKIE_SAME_SITE
+        value: none
       # Optional — only needed if you want real emails delivered instead of
       # just logged to the server console. Set ONE of these two groups:
       #   Resend:  RESEND_API_KEY
